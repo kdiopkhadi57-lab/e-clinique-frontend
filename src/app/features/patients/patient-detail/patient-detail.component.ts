@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Patient } from '../../../core/models/patient.model';
 import { Consultation } from '../../../core/models/consultation.model';
 import { PatientService } from '../../../core/services/patient.service';
@@ -26,8 +26,12 @@ import { AuthService } from '../../../core/services/auth.service';
           <a class="btn btn-primary" *ngIf="auth.hasRole('ADMIN','MEDECIN')" [routerLink]="['/consultations/nouvelle', patient.id]">
             <i class="bi bi-plus-lg"></i> Nouvelle consultation
           </a>
+          <button class="btn btn-outline-danger" *ngIf="auth.hasRole('ADMIN')" (click)="supprimer()">
+            <i class="bi bi-trash"></i> Supprimer
+          </button>
         </div>
       </div>
+      <div class="alert alert-danger no-print" *ngIf="erreurSuppression">{{ erreurSuppression }}</div>
 
       <div class="row g-3 mb-4">
         <div class="col-md-6">
@@ -157,8 +161,21 @@ export class PatientDetailComponent implements OnInit {
     private patientService: PatientService,
     private consultationService: ConsultationService,
     private documentService: DocumentService,
-    public auth: AuthService
+    public auth: AuthService,
+    private router: Router
   ) {}
+
+  erreurSuppression = '';
+
+  supprimer(): void {
+    const p = this.patient!;
+    if (!confirm(`Supprimer définitivement ${p.prenom} ${p.nom} (${p.numeroDossier}) ?\n`
+      + 'Ses consultations, rendez-vous et factures non payées seront aussi supprimés.')) return;
+    this.patientService.delete(p.id!).subscribe({
+      next: () => this.router.navigate(['/patients']),
+      error: (err) => (this.erreurSuppression = err.error?.message || 'La suppression a échoué.')
+    });
+  }
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));

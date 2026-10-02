@@ -40,6 +40,9 @@ import { PaginationComponent } from '../../../shared/pagination/pagination.compo
              [(ngModel)]="recherche" (ngModelChange)="rechercher()">
     </div>
 
+    <div class="alert alert-danger" *ngIf="erreurSuppression">{{ erreurSuppression }}</div>
+    <div class="alert alert-success" *ngIf="messageSuppression">{{ messageSuppression }}</div>
+
     <div class="card">
       <div class="table-responsive">
         <table class="table table-hover mb-0">
@@ -69,6 +72,10 @@ import { PaginationComponent } from '../../../shared/pagination/pagination.compo
                 <a [routerLink]="['/patients', p.id, 'modifier']" class="btn btn-sm btn-outline-secondary" title="Modifier">
                   <i class="bi bi-pencil"></i>
                 </a>
+                <button type="button" *ngIf="auth.hasRole('ADMIN')" class="btn btn-sm btn-outline-danger ms-1"
+                        title="Supprimer" (click)="supprimer(p)">
+                  <i class="bi bi-trash"></i>
+                </button>
               </td>
             </tr>
             <tr *ngIf="patients.length === 0">
@@ -90,7 +97,24 @@ export class PatientListComponent implements OnInit {
   page = 1;
   readonly pageSize = 10;
 
+  erreurSuppression = '';
+  messageSuppression = '';
+
   constructor(private patientService: PatientService, public auth: AuthService) {}
+
+  supprimer(p: Patient): void {
+    if (!confirm(`Supprimer définitivement ${p.prenom} ${p.nom} (${p.numeroDossier}) ?\n`
+      + 'Ses consultations, rendez-vous et factures non payées seront aussi supprimés.')) return;
+    this.erreurSuppression = '';
+    this.messageSuppression = '';
+    this.patientService.delete(p.id!).subscribe({
+      next: () => {
+        this.patients = this.patients.filter((x) => x.id !== p.id);
+        this.messageSuppression = `${p.prenom} ${p.nom} a été supprimé.`;
+      },
+      error: (err) => (this.erreurSuppression = err.error?.message || 'La suppression a échoué.')
+    });
+  }
 
   ngOnInit(): void {
     this.charger();
