@@ -5,7 +5,6 @@ import { ComptabiliteService } from '../../core/services/comptabilite.service';
 import { RouterLink } from '@angular/router';
 import { BarChartComponent, SerieGraphique } from '../../shared/bar-chart/bar-chart.component';
 import { BilanPeriode, ComptabiliteResume, Encaissement, PaiementEmploye, PeriodeBilan } from '../../core/models/comptabilite.model';
-import { Utilisateur } from '../../core/models/user.model';
 
 @Component({
   selector: 'app-comptabilite', standalone: true, imports: [CommonModule, FormsModule, RouterLink, BarChartComponent],
@@ -81,20 +80,15 @@ import { Utilisateur } from '../../core/models/user.model';
         </table>
       </div>
     </div>
-    <div class="row g-3"><div class="col-12"><div class="card p-3"><h6>Effectuer un paiement</h6>
-        <select class="form-select mb-2" [(ngModel)]="paiement.employeId"><option [ngValue]="null">-- Employé --</option><option *ngFor="let e of employes" [ngValue]="e.id">{{ e.prenom }} {{ e.nom }} - {{ e.profession || e.role }}</option></select>
-        <input class="form-control mb-2" type="number" placeholder="Montant FCFA" [(ngModel)]="paiement.montant">
-        <input class="form-control mb-2" placeholder="Période (ex: Septembre 2026)" [(ngModel)]="paiement.periode">
-        <input class="form-control mb-2" placeholder="Motif" [(ngModel)]="paiement.motif">
-        <button class="btn btn-success" (click)="payer()">Enregistrer le paiement</button>
-        <hr><h6>Historique traçable</h6><div *ngFor="let p of paiements" class="border-bottom py-2">{{ p.datePaiement | date:'dd/MM/yyyy HH:mm' }} - {{ p.employeNom }} : <strong>{{ p.montant | number:'1.0-0' }} FCFA</strong> ({{ p.periode }})</div>
+    <div class="row g-3"><div class="col-12"><div class="card p-3">
+        <h6>Historique des paiements employés</h6><div *ngFor="let p of paiements" class="border-bottom py-2">{{ p.datePaiement | date:'dd/MM/yyyy HH:mm' }} - {{ p.employeNom }} : <strong>{{ p.montant | number:'1.0-0' }} FCFA</strong> ({{ p.periode }})</div>
+        <div *ngIf="paiements.length === 0" class="text-muted">Aucun paiement enregistré.</div>
       </div></div>
     </div>
   `
 })
 export class ComptabiliteComponent implements OnInit {
-  resume?: ComptabiliteResume; employes: Utilisateur[] = []; paiements: PaiementEmploye[] = []; encaissements: Encaissement[] = [];
-  nouveau: any = { role: 'EMPLOYE', actif: true }; paiement: any = {};
+  resume?: ComptabiliteResume; paiements: PaiementEmploye[] = []; encaissements: Encaissement[] = [];
   periodes: { code: PeriodeBilan; libelle: string }[] = [
     { code: 'MOIS', libelle: 'Mensuel' }, { code: 'TRIMESTRE', libelle: '3 mois' },
     { code: 'SEMESTRE', libelle: '6 mois' }, { code: 'ANNEE', libelle: 'Annuel' }];
@@ -126,7 +120,5 @@ export class ComptabiliteComponent implements OnInit {
         { nom: 'Dépenses', valeurs: b.map(x => x.depenses) }];
     });
   }
-  charger(): void { this.service.resume().subscribe(r => this.resume = r); this.service.employes().subscribe(e => this.employes = e); this.service.paiements().subscribe(p => this.paiements = p); this.service.encaissements().subscribe(e => this.encaissements = e); }
-  creerEmploye(): void { this.service.creerEmploye(this.nouveau).subscribe(() => { this.nouveau = { role: 'EMPLOYE', actif: true }; this.charger(); }); }
-  payer(): void { this.service.payer(this.paiement).subscribe(() => { this.paiement = {}; this.charger(); }); }
+  charger(): void { this.service.resume().subscribe(r => this.resume = r); this.service.paiements().subscribe(p => this.paiements = p); this.service.encaissements().subscribe(e => this.encaissements = e); }
 }
