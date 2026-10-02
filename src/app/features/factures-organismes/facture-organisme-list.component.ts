@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { FactureOrganismeService } from '../../core/services/facture-organisme.service';
 import { OrganismeService } from '../../core/services/organisme.service';
 import { FactureOrganisme, Organisme, PriseEnCharge } from '../../core/models/organisme.model';
+import { EnvoiResultat, EnvoiService } from '../../core/services/envoi.service';
 
 @Component({
   selector: 'app-facture-organisme-list',
@@ -72,17 +73,33 @@ import { FactureOrganisme, Organisme, PriseEnCharge } from '../../core/models/or
     </div>
 
     <div class="card p-3">
-      <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
         <h6 class="mb-0">Historique</h6>
+        <button class="btn btn-sm btn-primary ms-auto" (click)="envoyerEnAttente()" [disabled]="envoiEnCours || !nonEnvoyees"
+                title="Envoie par e-mail chaque facture en attente, pas encore envoyée, à son organisme">
+          <span class="spinner-border spinner-border-sm me-1" *ngIf="envoiEnCours"></span>
+          <i class="bi bi-send" *ngIf="!envoiEnCours"></i> Envoyer les factures non envoyées ({{ nonEnvoyees }})
+        </button>
         <select class="form-select form-select-sm w-auto" [(ngModel)]="filtreOrganisme" (change)="charger()">
           <option [ngValue]="null">Tous les organismes</option>
           <option *ngFor="let o of organismes" [ngValue]="o.id">{{ o.nom }}</option>
         </select>
       </div>
+      <div class="mb-2" *ngIf="resultatsEnvoi">
+        <div class="alert py-2 mb-1" [class.alert-success]="envoyees === resultatsEnvoi.length" [class.alert-warning]="envoyees !== resultatsEnvoi.length">
+          {{ envoyees }} facture(s) envoyée(s) sur {{ resultatsEnvoi.length }}.
+          <button type="button" class="btn-close float-end" (click)="resultatsEnvoi = null"></button>
+        </div>
+        <ul class="small mb-0" *ngIf="envoyees !== resultatsEnvoi.length">
+          <li *ngFor="let r of resultatsEnvoi" [class.text-danger]="!r.envoye">
+            {{ r.reference }} — {{ r.destinataire }} : {{ r.envoye ? 'envoyée à ' + r.destinataires : r.message }}</li>
+        </ul>
+      </div>
+      <div class="alert alert-danger py-2" *ngIf="erreurEnvoi">{{ erreurEnvoi }}</div>
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
           <thead><tr><th>N°</th><th>Organisme</th><th>Période</th><th>Émise le</th><th class="text-end">Lignes</th>
-            <th class="text-end">Montant</th><th>Statut</th></tr></thead>
+            <th class="text-end">Montant</th><th>Statut</th><th>Envoi</th></tr></thead>
           <tbody>
             <tr *ngFor="let f of factures" class="cliquable" (click)="ouvrir(f)">
               <td><strong>{{ f.numero }}</strong></td>
@@ -93,8 +110,12 @@ import { FactureOrganisme, Organisme, PriseEnCharge } from '../../core/models/or
               <td class="text-end">{{ f.montantTotal | number:'1.0-0' }} FCFA</td>
               <td><span class="badge" [class.bg-warning]="f.statut === 'EN_ATTENTE'" [class.text-dark]="f.statut === 'EN_ATTENTE'"
                         [class.bg-success]="f.statut === 'PAYEE'" [class.bg-secondary]="f.statut === 'ANNULEE'">{{ libelleStatut(f.statut) }}</span></td>
+              <td class="small">
+                <span *ngIf="f.dateEnvoi" [title]="'Envoyée à ' + f.envoyeA"><i class="bi bi-envelope-check text-success"></i> {{ f.dateEnvoi | date:'dd/MM/yyyy' }}</span>
+                <span *ngIf="!f.dateEnvoi" class="text-muted">{{ f.statut === 'ANNULEE' ? '—' : 'Non envoyée' }}</span>
+              </td>
             </tr>
-            <tr *ngIf="!factures.length"><td colspan="7" class="text-center text-muted">Aucune facture organisme.</td></tr>
+            <tr *ngIf="!factures.length"><td colspan="8" class="text-center text-muted">Aucune facture organisme.</td></tr>
           </tbody>
         </table>
       </div>
@@ -112,8 +133,24 @@ export class FactureOrganismeListComponent implements OnInit {
   observations = '';
   apercu: PriseEnCharge[] | null = null;
   erreur = '';
+  envoiEnCours = false;
+  resultatsEnvoi: EnvoiResultat[] | null = null;
+  erreurEnvoi = '';
 
-  constructor(private service: FactureOrganismeService, private organismeService: OrganismeService, private router: Router) {}
+  constructor(private service: FactureOrganismeService, private organismeService: OrganismeService, private router: Router,
+              private envoiService: EnvoiService) {}
+
+  get nonEnvoyees(): number { return this.factures.filter((f) => f.statut === 'EN_ATTENTE' && !f.dateEnvoi).length; }
+  get envoyees(): number { return (this.resultatsEnvoi || []).filter((r) => r.envoye).length; }
+
+  envoyerEnAttente(): void {
+    if (!confirm(`Envoyer par e-mail les factures en attente non envoyées à leur organisme ?`)) return;
+    this.envoiEnCours = true; this.erreurEnvoi = ''; this.resultatsEnvoi = null;
+    this.envoiService.facturesOrganismesEnAttente().subscribe({
+      next: (r) => { this.envoiEnCours = false; this.resultatsEnvoi = r; this.charger(); },
+      error: (err) => { this.envoiEnCours = false; this.erreurEnvoi = err.error?.message || 'Échec de l\'envoi'; }
+    });
+  }
 
   ngOnInit(): void {
     this.organismeService.findAll().subscribe((o) => (this.organismes = o));

@@ -41,6 +41,8 @@ export interface FactureOrganisme {
   creeParNom?: string;
   nombreLignes: number;
   lignes: PriseEnCharge[];
+  dateEnvoi?: string | null;
+  envoyeA?: string | null;
 }
 
 /** Ligne facturable à un organisme : encaissement d'accueil ou facture patient en tiers-payant. */

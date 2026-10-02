@@ -4,10 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { ComptabiliteService } from '../../core/services/comptabilite.service';
 import { RouterLink } from '@angular/router';
 import { BarChartComponent, SerieGraphique } from '../../shared/bar-chart/bar-chart.component';
+import { EnvoiEmailComponent } from '../../shared/envoi-email/envoi-email.component';
+import { EnvoiRequest, EnvoiService } from '../../core/services/envoi.service';
+import { DocumentService } from '../../core/services/document.service';
 import { BilanPeriode, ComptabiliteResume, Encaissement, PaiementEmploye, PeriodeBilan } from '../../core/models/comptabilite.model';
 
 @Component({
-  selector: 'app-comptabilite', standalone: true, imports: [CommonModule, FormsModule, RouterLink, BarChartComponent],
+  selector: 'app-comptabilite', standalone: true, imports: [CommonModule, FormsModule, RouterLink, BarChartComponent, EnvoiEmailComponent],
   template: `
     <h4><i class="bi bi-calculator"></i> Comptabilité & employés</h4>
     <div class="row g-3 my-2" *ngIf="resume">
@@ -19,6 +22,40 @@ import { BilanPeriode, ComptabiliteResume, Encaissement, PaiementEmploye, Period
       <div class="col-6 col-md-3"><div class="card p-3"><small class="text-muted">Pris en charge assurances / IPM</small><strong>{{ resume.totalPartOrganismes | number:'1.0-0' }} FCFA</strong></div></div>
       <div class="col-6 col-md-3"><a routerLink="/organismes" class="card p-3 text-decoration-none"><small class="text-muted">Créances organismes à encaisser</small><strong class="text-dark">{{ resume.creancesOrganismesEnAttente | number:'1.0-0' }} FCFA</strong></a></div>
       <div class="col-6 col-md-3"><div class="card p-3"><small class="text-muted">Factures (hors annulées)</small><strong>{{ resume.totalFactures | number:'1.0-0' }} FCFA</strong></div></div>
+    </div>
+
+    <div class="card p-3 mb-3">
+      <h6 class="mb-1"><i class="bi bi-file-earmark-spreadsheet"></i> Export comptable</h6>
+      <p class="text-muted small mb-2">Fichier Excel de la période : synthèse, factures patients, factures assurances / IPM,
+        encaissements à l'accueil et paiements des employés.</p>
+      <div class="row g-2 align-items-end">
+        <div class="col-6 col-md-2">
+          <label class="form-label small mb-1">Du</label>
+          <input type="date" class="form-control form-control-sm" [(ngModel)]="exportDebut">
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="form-label small mb-1">Au</label>
+          <input type="date" class="form-control form-control-sm" [(ngModel)]="exportFin">
+        </div>
+        <div class="col-md-8 d-flex flex-wrap gap-2">
+          <button class="btn btn-sm btn-light border" (click)="periodeExport('moisPrecedent')">Mois précédent</button>
+          <button class="btn btn-sm btn-light border" (click)="periodeExport('mois')">Mois en cours</button>
+          <button class="btn btn-sm btn-light border" (click)="periodeExport('trimestre')">Trimestre</button>
+          <button class="btn btn-sm btn-light border" (click)="periodeExport('annee')">Année</button>
+          <button class="btn btn-sm btn-primary" (click)="telechargerExport()" [disabled]="!periodeExportValide || exportEnCours">
+            <i class="bi bi-download"></i> Télécharger
+          </button>
+          <button class="btn btn-sm btn-primary" (click)="envoiExportOuvert = !envoiExportOuvert" [disabled]="!periodeExportValide">
+            <i class="bi bi-envelope"></i> Envoyer au comptable
+          </button>
+        </div>
+      </div>
+      <div class="border rounded p-2 mt-2" *ngIf="envoiExportOuvert">
+        <app-envoi-email [destinatairesParDefaut]="emailsComptable" libelle="Envoyer l'export" placeholder="comptable@cabinet.sn"
+                         [enCours]="exportEnCours" (envoyer)="envoyerExport($event)" (annuler)="envoiExportOuvert = false" />
+      </div>
+      <div class="alert alert-success py-2 mt-2 mb-0" *ngIf="messageExport">{{ messageExport }}</div>
+      <div class="alert alert-danger py-2 mt-2 mb-0" *ngIf="erreurExport">{{ erreurExport }}</div>
     </div>
 
     <div class="card p-3 mb-3">
@@ -100,8 +137,55 @@ export class ComptabiliteComponent implements OnInit {
   seriesRecettes: SerieGraphique[] = [];
   seriesSolde: SerieGraphique[] = [];
   infosSolde: SerieGraphique[] = [];
-  constructor(private service: ComptabiliteService) {}
-  ngOnInit(): void { this.charger(); this.chargerBilan(); }
+  exportDebut = '';
+  exportFin = '';
+  exportEnCours = false;
+  envoiExportOuvert = false;
+  emailsComptable = '';
+  messageExport = '';
+  erreurExport = '';
+  constructor(private service: ComptabiliteService, private envoiService: EnvoiService, private documentService: DocumentService) {}
+  ngOnInit(): void {
+    this.charger(); this.chargerBilan(); this.periodeExport('moisPrecedent');
+    this.envoiService.parametres().subscribe({ next: (p) => (this.emailsComptable = p.emailsComptable), error: () => {} });
+  }
+  get periodeExportValide(): boolean { return !!this.exportDebut && !!this.exportFin && this.exportDebut <= this.exportFin; }
+  periodeExport(type: 'mois' | 'moisPrecedent' | 'trimestre' | 'annee'): void {
+    const d = new Date();
+    let debut: Date, fin: Date;
+    if (type === 'annee') { debut = new Date(d.getFullYear(), 0, 1); fin = new Date(d.getFullYear(), 11, 31); }
+    else if (type === 'trimestre') {
+      const t = Math.floor(d.getMonth() / 3) * 3;
+      debut = new Date(d.getFullYear(), t, 1); fin = new Date(d.getFullYear(), t + 3, 0);
+    } else {
+      const m = d.getMonth() - (type === 'moisPrecedent' ? 1 : 0);
+      debut = new Date(d.getFullYear(), m, 1); fin = new Date(d.getFullYear(), m + 1, 0);
+    }
+    this.exportDebut = this.iso(debut); this.exportFin = this.iso(fin);
+  }
+  telechargerExport(): void {
+    this.erreurExport = ''; this.messageExport = ''; this.exportEnCours = true;
+    this.service.exporter(this.exportDebut, this.exportFin).subscribe({
+      next: (blob) => {
+        this.exportEnCours = false;
+        this.documentService.telecharger(blob, `export-comptable_${this.exportDebut}_${this.exportFin}.xlsx`);
+      },
+      error: () => { this.exportEnCours = false; this.erreurExport = 'Impossible de générer l\'export comptable'; }
+    });
+  }
+  envoyerExport(req: EnvoiRequest): void {
+    this.erreurExport = ''; this.messageExport = ''; this.exportEnCours = true;
+    this.envoiService.exportComptable({ ...req, debut: this.exportDebut, fin: this.exportFin }).subscribe({
+      next: (r) => {
+        this.exportEnCours = false; this.envoiExportOuvert = false;
+        this.messageExport = `Export envoyé à ${r.destinataires}.`;
+      },
+      error: (err) => { this.exportEnCours = false; this.erreurExport = err.error?.message || 'Échec de l\'envoi de l\'export'; }
+    });
+  }
+  private iso(d: Date): string {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
   changerPeriode(p: PeriodeBilan): void { this.periode = p; this.chargerBilan(); }
   get libellePeriodeTotale(): string { return this.periode === 'ANNEE' ? `${this.annee - 4}–${this.annee}` : String(this.annee); }
   totalBilan(champ: 'totalRecettes' | 'depenses' | 'solde' | 'nombreActes'): number { return this.bilan.reduce((s, b) => s + b[champ], 0); }

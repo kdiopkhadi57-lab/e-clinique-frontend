@@ -14,6 +14,10 @@ export class ComptabiliteService {
   bilan(periode: PeriodeBilan, annee: number): Observable<BilanPeriode[]> {
     return this.http.get<BilanPeriode[]>(`${this.apiUrl}/bilan?periode=${periode}&annee=${annee}`);
   }
+  /** Export Excel de la période (dates au format AAAA-MM-JJ). */
+  exporter(debut: string, fin: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/export?debut=${debut}&fin=${fin}`, { responseType: 'blob' });
+  }
   encaissements(): Observable<Encaissement[]> { return this.http.get<Encaissement[]>(`${this.apiUrl}/encaissements`); }
   paiements(): Observable<PaiementEmploye[]> { return this.http.get<PaiementEmploye[]>(`${this.apiUrl}/paiements`); }
   employes(): Observable<Utilisateur[]> { return this.http.get<Utilisateur[]>(`${this.usersUrl}/employes`); }

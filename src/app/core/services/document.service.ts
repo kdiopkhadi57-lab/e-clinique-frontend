@@ -14,6 +14,20 @@ export class DocumentService {
     return this.http.get(`${this.apiUrl}/factures/${factureId}/recu`, { responseType: 'blob' });
   }
 
+  factureOrganisme(id: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/factures-organismes/${id}`, { responseType: 'blob' });
+  }
+
+  /** Enregistre un fichier reçu du serveur sous le nom donné. */
+  telecharger(blob: Blob, nomFichier: string): void {
+    const url = window.URL.createObjectURL(blob);
+    const lien = document.createElement('a');
+    lien.href = url;
+    lien.download = nomFichier;
+    lien.click();
+    setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+  }
+
   rapportMedical(patientId: number): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/patients/${patientId}/rapport-medical`, { responseType: 'blob' });
   }

@@ -34,6 +34,8 @@ export interface Facture {
   partOrganisme?: number;
   partPatient?: number;
   factureOrganismeId?: number | null;
+  dateEnvoi?: string | null;
+  envoyeA?: string | null;
   lignes: LigneFacture[];
 }
 

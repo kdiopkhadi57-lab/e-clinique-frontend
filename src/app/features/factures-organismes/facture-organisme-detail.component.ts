@@ -6,11 +6,14 @@ import { FactureOrganismeService } from '../../core/services/facture-organisme.s
 import { FactureOrganisme } from '../../core/models/organisme.model';
 import { ModePaiement } from '../../core/models/facture.model';
 import { AuthService } from '../../core/services/auth.service';
+import { DocumentService } from '../../core/services/document.service';
+import { EnvoiRequest, EnvoiService } from '../../core/services/envoi.service';
+import { EnvoiEmailComponent } from '../../shared/envoi-email/envoi-email.component';
 
 @Component({
   selector: 'app-facture-organisme-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, EnvoiEmailComponent],
   template: `
     <div class="alert alert-danger" *ngIf="erreur">{{ erreur }}</div>
     <ng-container *ngIf="facture">
@@ -23,6 +26,9 @@ import { AuthService } from '../../core/services/auth.service';
         </div>
         <div class="d-flex gap-2 flex-wrap align-items-center">
           <button class="btn btn-outline-primary" (click)="imprimer()"><i class="bi bi-printer"></i> Imprimer</button>
+          <button class="btn btn-outline-primary" (click)="telechargerPdf()"><i class="bi bi-file-earmark-pdf"></i> PDF</button>
+          <button class="btn btn-outline-primary" *ngIf="facture.statut !== 'ANNULEE'" (click)="envoiOuvert = !envoiOuvert">
+            <i class="bi bi-envelope"></i> Envoyer à l'organisme</button>
           <ng-container *ngIf="facture.statut === 'EN_ATTENTE'">
             <select class="form-select w-auto" [(ngModel)]="modePaiement">
               <option value="VIREMENT">Virement</option>
@@ -36,6 +42,17 @@ import { AuthService } from '../../core/services/auth.service';
           </ng-container>
         </div>
       </div>
+
+      <div class="card p-3 mb-3 no-print" *ngIf="envoiOuvert">
+        <h6 class="mb-2">Envoyer la facture {{ facture.numero }} par e-mail (PDF joint)</h6>
+        <app-envoi-email [destinatairesParDefaut]="facture.organisme.email || ''" libelle="Envoyer la facture"
+                         [placeholder]="facture.organisme.email ? '' : 'Aucune adresse enregistrée pour ' + facture.organisme.nom"
+                         [enCours]="envoiEnCours" (envoyer)="envoyer($event)" (annuler)="envoiOuvert = false" />
+      </div>
+      <div class="alert alert-info py-2 no-print" *ngIf="facture.dateEnvoi">
+        <i class="bi bi-envelope-check"></i> Envoyée le {{ facture.dateEnvoi | date:'dd/MM/yyyy à HH:mm' }} à {{ facture.envoyeA }}
+      </div>
+      <div class="alert alert-success py-2 no-print" *ngIf="messageEnvoi">{{ messageEnvoi }}</div>
 
       <div class="facture-org">
         <header class="entete">
@@ -121,8 +138,30 @@ export class FactureOrganismeDetailComponent implements OnInit {
   facture: FactureOrganisme | null = null;
   modePaiement: ModePaiement = 'VIREMENT';
   erreur = '';
+  envoiOuvert = false;
+  envoiEnCours = false;
+  messageEnvoi = '';
 
-  constructor(private route: ActivatedRoute, private service: FactureOrganismeService, public auth: AuthService) {}
+  constructor(private route: ActivatedRoute, private service: FactureOrganismeService, public auth: AuthService,
+              private documentService: DocumentService, private envoiService: EnvoiService) {}
+
+  telechargerPdf(): void {
+    this.documentService.factureOrganisme(this.facture!.id).subscribe({
+      next: (blob) => this.documentService.telecharger(blob, `facture_${this.facture!.numero}.pdf`),
+      error: () => (this.erreur = 'Impossible de générer le PDF')
+    });
+  }
+
+  envoyer(req: EnvoiRequest): void {
+    this.erreur = ''; this.messageEnvoi = ''; this.envoiEnCours = true;
+    this.envoiService.factureOrganisme(this.facture!.id, req).subscribe({
+      next: (f) => {
+        this.facture = f; this.envoiEnCours = false; this.envoiOuvert = false;
+        this.messageEnvoi = `Facture envoyée à ${f.envoyeA}.`;
+      },
+      error: (err) => { this.envoiEnCours = false; this.erreur = err.error?.message || 'Échec de l\'envoi'; }
+    });
+  }
 
   ngOnInit(): void { this.charger(); }
 

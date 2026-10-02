@@ -6,11 +6,13 @@ import { Facture, ModePaiement } from '../../../core/models/facture.model';
 import { FactureService } from '../../../core/services/facture.service';
 import { DocumentService } from '../../../core/services/document.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { EnvoiRequest, EnvoiService } from '../../../core/services/envoi.service';
+import { EnvoiEmailComponent } from '../../../shared/envoi-email/envoi-email.component';
 
 @Component({
   selector: 'app-facture-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, EnvoiEmailComponent],
   template: `
     <div *ngIf="chargement" class="alert alert-info d-flex align-items-center gap-2">
       <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
@@ -29,6 +31,10 @@ import { AuthService } from '../../../core/services/auth.service';
           <button class="btn btn-outline-primary" (click)="imprimerRecu()">
             <i class="bi bi-printer"></i> Imprimer le reçu
           </button>
+          <button class="btn btn-outline-primary" *ngIf="facture.statut !== 'ANNULEE' && auth.hasRole('ADMIN','RECEPTIONNISTE')"
+                  (click)="envoiOuvert = !envoiOuvert">
+            <i class="bi bi-envelope"></i> Envoyer au patient
+          </button>
           <button class="btn btn-success" *ngIf="facture.statut === 'EN_ATTENTE' && auth.hasRole('ADMIN','RECEPTIONNISTE')"
                   (click)="ouvrirModalPaiement()">
             <i class="bi bi-cash"></i> Marquer payée
@@ -38,6 +44,17 @@ import { AuthService } from '../../../core/services/auth.service';
             <i class="bi bi-x-lg"></i> Annuler
           </button>
         </div>
+      </div>
+
+      <div class="card p-3 mb-3 no-print" *ngIf="envoiOuvert">
+        <h6 class="mb-2">Envoyer la facture {{ facture.numeroFacture }} par e-mail (PDF joint)</h6>
+        <app-envoi-email [destinatairesParDefaut]="facture.patient.email || ''" libelle="Envoyer la facture"
+                         [placeholder]="facture.patient.email ? '' : 'Aucune adresse enregistrée pour ce patient'"
+                         [enCours]="envoiEnCours" (envoyer)="envoyer($event)" (annuler)="envoiOuvert = false" />
+        <div class="alert alert-danger py-2 mt-2 mb-0" *ngIf="erreurEnvoi">{{ erreurEnvoi }}</div>
+      </div>
+      <div class="alert alert-info py-2 no-print" *ngIf="facture.dateEnvoi">
+        <i class="bi bi-envelope-check"></i> Envoyée le {{ facture.dateEnvoi | date:'dd/MM/yyyy à HH:mm' }} à {{ facture.envoyeA }}
       </div>
 
       <div class="invoice-page">
@@ -393,13 +410,29 @@ export class FactureDetailComponent implements OnInit {
   erreur = '';
   modalPaiementOuvert = false;
   modePaiementChoisi: ModePaiement = 'ESPECES';
+  envoiOuvert = false;
+  envoiEnCours = false;
+  erreurEnvoi = '';
 
   constructor(
     private route: ActivatedRoute,
     private factureService: FactureService,
     private documentService: DocumentService,
+    private envoiService: EnvoiService,
     public auth: AuthService
   ) {}
+
+  envoyer(req: EnvoiRequest): void {
+    if (!this.facture?.id) return;
+    this.erreurEnvoi = ''; this.envoiEnCours = true;
+    this.envoiService.facturePatient(this.facture.id, req).subscribe({
+      next: (f) => {
+        this.envoiEnCours = false; this.envoiOuvert = false;
+        if (this.facture) { this.facture.dateEnvoi = f.dateEnvoi; this.facture.envoyeA = f.envoyeA; }
+      },
+      error: (err) => { this.envoiEnCours = false; this.erreurEnvoi = err.error?.message || 'Échec de l\'envoi'; }
+    });
+  }
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
