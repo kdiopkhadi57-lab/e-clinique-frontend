@@ -4,8 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { FactureOrganismeService } from '../../core/services/facture-organisme.service';
 import { OrganismeService } from '../../core/services/organisme.service';
-import { FactureOrganisme, Organisme } from '../../core/models/organisme.model';
-import { Encaissement } from '../../core/models/comptabilite.model';
+import { FactureOrganisme, Organisme, PriseEnCharge } from '../../core/models/organisme.model';
 
 @Component({
   selector: 'app-facture-organisme-list',
@@ -58,9 +57,9 @@ import { Encaissement } from '../../core/models/comptabilite.model';
             <thead><tr><th>Date</th><th>Patient</th><th>Matricule</th><th>Acte</th><th class="text-end">Montant</th><th class="text-end">Part organisme</th></tr></thead>
             <tbody>
               <tr *ngFor="let e of apercu">
-                <td>{{ e.dateEncaissement | date:'dd/MM/yyyy' }}</td>
+                <td>{{ e.date | date:'dd/MM/yyyy' }}</td>
                 <td>{{ e.patientNom }}</td><td>{{ e.matriculeAssure || '-' }}</td>
-                <td>{{ e.type === 'CONSULTATION' ? 'Consultation' : 'Rendez-vous' }}</td>
+                <td>{{ e.acte }}<span class="text-muted small" *ngIf="e.reference"> · {{ e.reference }}</span></td>
                 <td class="text-end">{{ e.montant | number:'1.0-0' }}</td>
                 <td class="text-end">{{ e.partOrganisme | number:'1.0-0' }}</td>
               </tr>
@@ -111,7 +110,7 @@ export class FactureOrganismeListComponent implements OnInit {
   debut = '';
   fin = '';
   observations = '';
-  apercu: Encaissement[] | null = null;
+  apercu: PriseEnCharge[] | null = null;
   erreur = '';
 
   constructor(private service: FactureOrganismeService, private organismeService: OrganismeService, private router: Router) {}

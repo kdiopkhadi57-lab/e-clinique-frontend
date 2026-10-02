@@ -105,6 +105,17 @@ import { Organisme, TypeOrganisme } from '../../../core/models/organisme.model';
                 <label class="form-label">Matricule / N° d'adhérent</label>
                 <input class="form-control" formControlName="matriculeAssure" placeholder="ex : ICS-4521">
               </div>
+              <div class="col-md-6" *ngIf="form.controls.organismeId.value">
+                <label class="form-label">Taux propre au patient (%)</label>
+                <input type="number" min="0" max="100" class="form-control" formControlName="tauxPriseEnCharge"
+                       (input)="majPartOrganisme()" [placeholder]="'Par défaut : ' + (organismeChoisi?.tauxPriseEnCharge ?? '-') + ' %'">
+                <small class="text-muted">À remplir seulement si le patient n'a pas le taux habituel de l'organisme.</small>
+              </div>
+              <div class="col-md-6" *ngIf="form.controls.organismeId.value">
+                <label class="form-label">Couverture valable jusqu'au</label>
+                <input type="date" class="form-control" formControlName="dateFinCouverture">
+                <small class="text-muted">Vide = sans date limite. Après cette date, tout est facturé au patient.</small>
+              </div>
             </div>
           </div>
           <div class="col-12 border-top pt-3" *ngIf="!patientId">
@@ -217,6 +228,8 @@ export class PatientFormComponent implements OnInit {
     ,montant: [5000 as number | null, [Validators.required, Validators.min(0)]]
     ,organismeId: ['' as string | number]
     ,matriculeAssure: ['']
+    ,tauxPriseEnCharge: [null as number | null, [Validators.min(0), Validators.max(100)]]
+    ,dateFinCouverture: ['' as string | null]
     ,partOrganisme: [null as number | null]
   });
 
@@ -269,7 +282,13 @@ export class PatientFormComponent implements OnInit {
   majPartOrganisme(): void {
     const o = this.organismeChoisi;
     const montant = Number(this.form.controls.montant.value) || 0;
-    this.form.controls.partOrganisme.setValue(o ? Math.round(montant * o.tauxPriseEnCharge / 100) : null);
+    this.form.controls.partOrganisme.setValue(o ? Math.round(montant * this.tauxEffectif / 100) : null);
+  }
+
+  /** Taux propre au patient s'il est saisi, sinon celui de l'organisme. */
+  get tauxEffectif(): number {
+    const taux = this.form.controls.tauxPriseEnCharge.value;
+    return taux != null && String(taux) !== '' ? Number(taux) : (this.organismeChoisi?.tauxPriseEnCharge ?? 0);
   }
 
   get resteAPayer(): number {
@@ -301,7 +320,14 @@ export class PatientFormComponent implements OnInit {
     const { suite, medecinId, dateHeure, dureeMinutes, motifRendezVous, typeConsultation, montant,
       organismeId, partOrganisme, ...patient } = donnees;
     patient.organisme = organismeId ? { id: Number(organismeId) } : null;
-    if (!organismeId) patient.matriculeAssure = '';
+    if (!organismeId) {
+      patient.matriculeAssure = '';
+      patient.tauxPriseEnCharge = null;
+      patient.dateFinCouverture = null;
+    }
+    if (patient.tauxPriseEnCharge === '' || patient.tauxPriseEnCharge == null) patient.tauxPriseEnCharge = null;
+    else patient.tauxPriseEnCharge = Number(patient.tauxPriseEnCharge);
+    if (!patient.dateFinCouverture) patient.dateFinCouverture = null;
 
     const operation = this.patientId
       ? this.patientService.update(this.patientId, patient)

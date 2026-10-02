@@ -53,8 +53,13 @@ import { AuthService } from '../../../core/services/auth.service';
               <p class="mb-1"><strong>Assureur / IPM :</strong> {{ o.nom }}
                 <span class="badge ms-1" [class.bg-primary]="o.type === 'ASSURANCE'" [class.bg-info]="o.type === 'IPM'">
                   {{ o.type === 'IPM' ? 'IPM' : 'Assurance' }}</span></p>
-              <p class="mb-1"><strong>Taux de prise en charge :</strong> {{ o.tauxPriseEnCharge }} %</p>
-              <p class="mb-0"><strong>Matricule :</strong> {{ patient.matriculeAssure || '-' }}</p>
+              <p class="mb-1"><strong>Taux de prise en charge :</strong> {{ patient.tauxPriseEnCharge ?? o.tauxPriseEnCharge }} %
+                <span class="text-muted small" *ngIf="patient.tauxPriseEnCharge != null">(taux propre au patient)</span></p>
+              <p class="mb-1"><strong>Matricule :</strong> {{ patient.matriculeAssure || '-' }}</p>
+              <p class="mb-0"><strong>Valable jusqu'au :</strong>
+                {{ patient.dateFinCouverture ? (patient.dateFinCouverture | date:'dd/MM/yyyy') : 'sans limite' }}
+                <span class="badge bg-danger ms-1" *ngIf="couvertureExpiree">Expirée</span>
+                <span class="badge bg-secondary ms-1" *ngIf="!o.actif">Organisme inactif</span></p>
             </ng-container>
             <ng-template #comptant><p class="mb-0 text-muted">Aucun assureur — paiement comptant.</p></ng-template>
           </div>
@@ -167,6 +172,14 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class PatientDetailComponent implements OnInit {
   patient: Patient | null = null;
+
+  get couvertureExpiree(): boolean {
+    const fin = this.patient?.dateFinCouverture;
+    if (!fin) return false;
+    const d = new Date();
+    const aujourdhui = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return fin < aujourdhui;
+  }
   consultations: Consultation[] = [];
   ordonnance: Consultation | null = null;
 

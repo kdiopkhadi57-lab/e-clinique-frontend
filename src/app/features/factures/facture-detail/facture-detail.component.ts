@@ -33,7 +33,7 @@ import { AuthService } from '../../../core/services/auth.service';
                   (click)="ouvrirModalPaiement()">
             <i class="bi bi-cash"></i> Marquer payée
           </button>
-          <button class="btn btn-outline-danger" *ngIf="facture.statut === 'EN_ATTENTE' && auth.hasRole('ADMIN','RECEPTIONNISTE')"
+          <button class="btn btn-outline-danger" *ngIf="facture.statut === 'EN_ATTENTE' && !facture.factureOrganismeId && auth.hasRole('ADMIN','RECEPTIONNISTE')"
                   (click)="annuler()">
             <i class="bi bi-x-lg"></i> Annuler
           </button>
@@ -59,6 +59,8 @@ import { AuthService } from '../../../core/services/auth.service';
             <div>{{ facture.patient?.adresse || 'Adresse non renseignée' }}</div>
             <div>{{ facture.patient?.telephone || 'Téléphone non renseigné' }}</div>
             <div>Email : {{ facture.patient?.email || 'Non renseigné' }}</div>
+            <div *ngIf="facture.organisme">Pris en charge par : <strong>{{ facture.organisme.nom }}</strong>
+              <span *ngIf="facture.matriculeAssure"> (matricule {{ facture.matriculeAssure }})</span></div>
           </div>
 
           <div class="bill-box details-box">
@@ -106,11 +108,26 @@ import { AuthService } from '../../../core/services/auth.service';
             <div class="col-total">-{{ afficherMontant(remise()) }}</div>
           </div>
 
+          <ng-container *ngIf="partOrganisme() > 0">
+            <div class="table-row subtotal-row">
+              <div class="col-description">Total</div>
+              <div class="col-qty"></div>
+              <div class="col-price"></div>
+              <div class="col-total">{{ afficherMontant(totalDu()) }}</div>
+            </div>
+            <div class="table-row tax-row">
+              <div class="col-description">Part {{ facture.organisme?.nom }} ({{ facture.tauxPriseEnCharge }} %)</div>
+              <div class="col-qty"></div>
+              <div class="col-price"></div>
+              <div class="col-total">-{{ afficherMontant(partOrganisme()) }}</div>
+            </div>
+          </ng-container>
+
           <div class="table-row total-row">
-            <div class="col-description">Total à payer</div>
+            <div class="col-description">{{ partOrganisme() > 0 ? 'Net à payer par le patient' : 'Total à payer' }}</div>
             <div class="col-qty"></div>
             <div class="col-price"></div>
-            <div class="col-total">{{ afficherMontant(totalDu()) }}</div>
+            <div class="col-total">{{ afficherMontant(totalDu() - partOrganisme()) }}</div>
           </div>
         </div>
 
@@ -465,6 +482,10 @@ export class FactureDetailComponent implements OnInit {
 
   remise(): number {
     return Math.max(Number(this.facture?.remise) || 0, 0);
+  }
+
+  partOrganisme(): number {
+    return Math.max(Number(this.facture?.partOrganisme) || 0, 0);
   }
 
   afficherMontant(valeur: number): string {

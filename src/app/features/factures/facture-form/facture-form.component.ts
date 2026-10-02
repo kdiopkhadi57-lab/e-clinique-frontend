@@ -20,9 +20,9 @@ import { Patient } from '../../../core/models/patient.model';
         <div class="row g-3 mb-3">
           <div class="col-md-6">
             <label class="form-label">Patient *</label>
-            <select class="form-select" formControlName="patientId">
+            <select class="form-select" formControlName="patientId" (change)="partManuelle = false">
               <option value="">-- Sélectionner un patient --</option>
-              <option *ngFor="let p of patients" [value]="p.id">{{ p.prenom }} {{ p.nom }} ({{ p.numeroDossier }})</option>
+              <option *ngFor="let p of patients" [value]="p.id">{{ p.prenom }} {{ p.nom }} ({{ p.numeroDossier }}){{ p.organisme ? ' — ' + p.organisme.nom : '' }}</option>
             </select>
           </div>
           <div class="col-md-3">
@@ -112,12 +112,42 @@ import { Patient } from '../../../core/models/patient.model';
           <textarea class="form-control" rows="3" formControlName="observations" placeholder="Ajoutez une observation ou une note pour cette facture..."></textarea>
         </div>
 
+        <div class="mt-3 p-3 border rounded" *ngIf="patientChoisi?.organisme as o">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" formControlName="tiersPayant" id="tiersPayant" (change)="partManuelle = false">
+            <label class="form-check-label fw-semibold" for="tiersPayant">
+              <i class="bi bi-shield-check me-1"></i> Tiers-payant {{ o.nom }}
+            </label>
+          </div>
+          <div class="alert alert-warning py-2 mt-2 mb-0" *ngIf="tauxPatient() === 0">
+            Couverture expirée ou organisme inactif : la facture sera entièrement à la charge du patient.
+          </div>
+          <div class="row g-3 mt-1" *ngIf="form.get('tiersPayant')?.value && tauxPatient() > 0">
+            <div class="col-md-4">
+              <label class="form-label">Part {{ o.nom }} (FCFA)</label>
+              <input type="number" min="0" class="form-control" [value]="partOrganisme()"
+                     (input)="saisirPartOrganisme($any($event.target).value)">
+              <small class="text-muted">Taux {{ tauxPatient() }} %<span *ngIf="patientChoisi?.matriculeAssure"> · matricule {{ patientChoisi?.matriculeAssure }}</span>
+                <a href="" class="ms-1" *ngIf="partManuelle" (click)="$event.preventDefault(); partManuelle = false">recalculer</a></small>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Part patient (FCFA)</label>
+              <input class="form-control" [value]="(totalGeneral() - partOrganisme()) | number:'1.0-0'" disabled>
+            </div>
+          </div>
+          <div class="text-danger small mt-1" *ngIf="partOrganisme() > totalGeneral()">La part prise en charge dépasse le total.</div>
+        </div>
+
         <div class="text-end mt-3">
           <h5>Total : {{ totalGeneral() | number:'1.0-0' }} FCFA</h5>
+          <div *ngIf="partOrganisme() > 0" class="text-muted">
+            dont {{ patientChoisi?.organisme?.nom }} : {{ partOrganisme() | number:'1.0-0' }} FCFA —
+            <strong class="text-body">à payer par le patient : {{ totalGeneral() - partOrganisme() | number:'1.0-0' }} FCFA</strong>
+          </div>
         </div>
 
         <div class="mt-4 d-flex gap-2">
-          <button type="submit" class="btn btn-primary btn-save" [disabled]="form.invalid || lignes.length === 0">
+          <button type="submit" class="btn btn-primary btn-save" [disabled]="form.invalid || lignes.length === 0 || partOrganisme() > totalGeneral()">
             <i class="bi bi-save"></i> Créer la facture
           </button>
           <button type="button" class="btn btn-outline-secondary" (click)="router.navigate(['/factures'])">Annuler</button>
@@ -129,6 +159,9 @@ import { Patient } from '../../../core/models/patient.model';
 export class FactureFormComponent implements OnInit {
   patients: Patient[] = [];
   erreur = '';
+  /** Part organisme saisie à la main ; sinon elle suit le taux du patient. */
+  partManuelle = false;
+  private partSaisie = 0;
 
   form = this.fb.group({
     patientId: ['', Validators.required],
@@ -136,6 +169,7 @@ export class FactureFormComponent implements OnInit {
     remise: [0, [Validators.min(0)]],
     modePaiement: [''],
     hospitalisation: [false],
+    tiersPayant: [true],
     dateAdmission: [''],
     dateSortie: [''],
     prixJournalierHospitalisation: [0, [Validators.min(0)]],
@@ -221,8 +255,31 @@ export class FactureFormComponent implements OnInit {
     return Math.max(total - remise, 0);
   }
 
+  get patientChoisi(): Patient | undefined {
+    const id = Number(this.form.get('patientId')?.value);
+    return id ? this.patients.find((p) => p.id === id) : undefined;
+  }
+
+  /** Même règle que le serveur : taux du patient ou de l'organisme, 0 si couverture expirée / organisme inactif. */
+  tauxPatient(): number {
+    const p = this.patientChoisi;
+    if (!p?.organisme || !p.organisme.actif) return 0;
+    if (p.dateFinCouverture && p.dateFinCouverture < this.dateLocaleAujourdHui()) return 0;
+    return p.tauxPriseEnCharge ?? p.organisme.tauxPriseEnCharge ?? 0;
+  }
+
+  partOrganisme(): number {
+    if (!this.form.get('tiersPayant')?.value || this.tauxPatient() === 0) return 0;
+    return this.partManuelle ? this.partSaisie : Math.round(this.totalGeneral() * this.tauxPatient() / 100);
+  }
+
+  saisirPartOrganisme(valeur: string): void {
+    this.partManuelle = true;
+    this.partSaisie = Math.max(Number(valeur) || 0, 0);
+  }
+
   enregistrer(): void {
-    if (this.form.invalid || this.lignes.length === 0) return;
+    if (this.form.invalid || this.lignes.length === 0 || this.partOrganisme() > this.totalGeneral()) return;
     const v = this.form.getRawValue();
     const remise = Number(v.remise || 0);
     const lignes = v.lignes.map((ligne: any) => ({
@@ -236,7 +293,9 @@ export class FactureFormComponent implements OnInit {
       observations: v.observations || '',
       remise,
       modePaiement: v.modePaiement || null,
-      lignes
+      lignes,
+      tiersPayant: !!v.tiersPayant,
+      partOrganisme: this.partManuelle && v.tiersPayant ? this.partSaisie : null
     };
     if (v.hospitalisation) {
       payload.dateAdmission = v.dateAdmission;

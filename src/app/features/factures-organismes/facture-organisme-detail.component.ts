@@ -70,10 +70,10 @@ import { AuthService } from '../../core/services/auth.service';
           <tbody>
             <tr *ngFor="let e of facture.lignes; let i = index">
               <td>{{ i + 1 }}</td>
-              <td>{{ e.dateEncaissement | date:'dd/MM/yyyy' }}</td>
+              <td>{{ e.date | date:'dd/MM/yyyy' }}</td>
               <td>{{ e.patientNom }}<div class="petit">{{ e.numeroDossier }}</div></td>
               <td>{{ e.matriculeAssure || '-' }}</td>
-              <td>{{ e.type === 'CONSULTATION' ? ('Consultation ' + (e.typeConsultation === 'SPECIALISEE' ? 'spécialisée' : 'générale')) : 'Rendez-vous' }}</td>
+              <td>{{ e.acte }}<div class="petit" *ngIf="e.reference">{{ e.reference }}</div></td>
               <td>{{ e.medecinNom || '-' }}</td>
               <td class="num">{{ e.montant | number:'1.0-0' }}</td>
               <td class="num">{{ e.partPatient | number:'1.0-0' }}</td>

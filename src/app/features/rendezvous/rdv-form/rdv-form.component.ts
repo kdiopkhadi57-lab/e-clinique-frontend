@@ -56,7 +56,7 @@ import { Utilisateur } from '../../../core/models/user.model';
           <button type="submit" class="btn btn-primary btn-save" [disabled]="form.invalid">
             <i class="bi bi-save"></i> Enregistrer
           </button>
-          <button type="button" class="btn btn-outline-secondary" (click)="router.navigate(['/rendezvous'])">Annuler</button>
+          <button type="button" class="btn btn-outline-secondary" (click)="router.navigate([pageRetour])">Annuler</button>
         </div>
       </form>
     </div>
@@ -67,6 +67,8 @@ export class RdvFormComponent implements OnInit {
   medecins: Utilisateur[] = [];
   erreur = '';
   patientIdDepuisNotification: number | null = null;
+  /** Page où revenir : le calendrier quand on vient d'un clic sur un créneau. */
+  pageRetour = '/rendezvous';
 
   form = this.fb.group({
     patientId: ['', Validators.required],
@@ -94,6 +96,10 @@ export class RdvFormComponent implements OnInit {
       this.patientIdDepuisNotification = Number(patientId);
       this.form.patchValue({ patientId });
     }
+    const query = this.route.snapshot.queryParamMap;
+    if (query.get('dateHeure')) this.form.patchValue({ dateHeure: query.get('dateHeure')! });
+    if (query.get('medecinId')) this.form.patchValue({ medecinId: query.get('medecinId')! });
+    if (query.get('retour') === 'calendrier') this.pageRetour = '/rendezvous/calendrier';
   }
 
   enregistrer(): void {
@@ -110,7 +116,7 @@ export class RdvFormComponent implements OnInit {
     };
 
     this.rendezVousService.create(payload).subscribe({
-      next: () => this.router.navigate(['/rendezvous']),
+      next: () => this.router.navigate([this.pageRetour]),
       error: (err) => (this.erreur = err.error?.message || 'Erreur lors de la création du rendez-vous')
     });
   }

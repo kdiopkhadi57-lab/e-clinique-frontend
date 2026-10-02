@@ -19,5 +19,7 @@ export interface Patient {
   telephonePersonneAContacter?: string;
   organisme?: Organisme | null;
   matriculeAssure?: string;
+  tauxPriseEnCharge?: number | null;
+  dateFinCouverture?: string | null;
   dateCreation?: string;
 }

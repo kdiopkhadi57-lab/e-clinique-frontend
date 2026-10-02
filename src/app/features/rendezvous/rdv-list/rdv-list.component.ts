@@ -13,9 +13,14 @@ import { PaginationComponent } from '../../../shared/pagination/pagination.compo
   template: `
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h4><i class="bi bi-calendar-check"></i> Rendez-vous</h4>
-      <a routerLink="/rendezvous/nouveau" class="btn btn-primary">
-        <i class="bi bi-plus-lg"></i> Nouveau rendez-vous
-      </a>
+      <div class="d-flex gap-2">
+        <a routerLink="/rendezvous/calendrier" class="btn btn-outline-primary">
+          <i class="bi bi-calendar3"></i> Calendrier
+        </a>
+        <a routerLink="/rendezvous/nouveau" class="btn btn-primary">
+          <i class="bi bi-plus-lg"></i> Nouveau rendez-vous
+        </a>
+      </div>
     </div>
 
     <div class="alert alert-danger" *ngIf="erreur">{{ erreur }}</div>

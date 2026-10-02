@@ -1,4 +1,3 @@
-import { Encaissement } from './comptabilite.model';
 import { ModePaiement, StatutFacture } from './facture.model';
 
 export type TypeOrganisme = 'ASSURANCE' | 'IPM';
@@ -41,7 +40,24 @@ export interface FactureOrganisme {
   observations?: string;
   creeParNom?: string;
   nombreLignes: number;
-  lignes: Encaissement[];
+  lignes: PriseEnCharge[];
+}
+
+/** Ligne facturable à un organisme : encaissement d'accueil ou facture patient en tiers-payant. */
+export interface PriseEnCharge {
+  source: 'ENCAISSEMENT' | 'FACTURE';
+  id: number;
+  reference?: string;
+  date: string;
+  patientId?: number;
+  patientNom: string;
+  numeroDossier?: string;
+  matriculeAssure?: string;
+  acte: string;
+  medecinNom?: string;
+  montant: number;
+  partPatient: number;
+  partOrganisme: number;
 }
 
 export interface FactureOrganismeRequest {

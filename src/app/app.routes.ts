@@ -47,6 +47,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/rendezvous/rdv-list/rdv-list.component').then(m => m.RdvListComponent)
   },
   {
+    path: 'rendezvous/calendrier',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/rendezvous/rdv-calendrier/rdv-calendrier.component').then(m => m.RdvCalendrierComponent)
+  },
+  {
     path: 'rendezvous/nouveau/:patientId',
     canActivate: [authGuard],
     loadComponent: () => import('./features/rendezvous/rdv-form/rdv-form.component').then(m => m.RdvFormComponent)
