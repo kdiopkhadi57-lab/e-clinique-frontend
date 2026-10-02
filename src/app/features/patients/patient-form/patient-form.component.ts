@@ -84,15 +84,22 @@ import { AuthService } from '../../../core/services/auth.service';
               Numéro de téléphone invalide.
             </div>
           </div>
-          <div class="col-12 border-top pt-3" *ngIf="!patientId && auth.hasRole('RECEPTIONNISTE')">
+          <div class="col-12 border-top pt-3" *ngIf="!patientId">
             <h6 class="text-primary">Suite à donner au patient</h6>
             <div class="row g-3">
               <div class="col-md-6">
-                <label class="form-label">Dossier concerné par *</label>
-                <select class="form-select" formControlName="suite">
-                  <option value="">-- Choisir --</option>
+                <label class="form-label">Dossier concerné par {{ suiteObligatoire ? '*' : '' }}</label>
+                <select class="form-select" formControlName="suite" (change)="majMontantParDefaut()">
+                  <option value="">{{ suiteObligatoire ? '-- Choisir --' : '-- Aucune --' }}</option>
                   <option value="CONSULTATION">Une consultation</option>
                   <option value="RENDEZVOUS">Un rendez-vous</option>
+                </select>
+              </div>
+              <div class="col-md-6" *ngIf="form.controls.suite.value">
+                <label class="form-label">Médecin concerné *</label>
+                <select class="form-select" formControlName="medecinId">
+                  <option value="">-- Choisir un médecin --</option>
+                  <option *ngFor="let medecin of medecins" [value]="medecin.id">Dr. {{ medecin.prenom }} {{ medecin.nom }}</option>
                 </select>
               </div>
               <ng-container *ngIf="form.controls.suite.value === 'RENDEZVOUS'">
@@ -109,28 +116,26 @@ import { AuthService } from '../../../core/services/auth.service';
                   <input class="form-control" formControlName="motifRendezVous">
                 </div>
               </ng-container>
-              <div class="col-md-6">
-                <label class="form-label">Médecin concerné *</label>
-                <select class="form-select" formControlName="medecinId">
-                  <option value="">-- Choisir un médecin --</option>
-                  <option *ngFor="let medecin of medecins" [value]="medecin.id">Dr. {{ medecin.prenom }} {{ medecin.nom }}</option>
+              <div class="col-md-6" *ngIf="form.controls.suite.value === 'CONSULTATION'">
+                <label class="form-label">Type de consultation *</label>
+                <select class="form-select" formControlName="typeConsultation" (change)="majMontantParDefaut()">
+                  <option value="GENERALE">Consultation générale - 5 000 FCFA</option>
+                  <option value="SPECIALISEE">Consultation spécialisée - 10 000 FCFA</option>
                 </select>
               </div>
-              <ng-container *ngIf="form.controls.suite.value === 'CONSULTATION'">
-                <div class="col-md-6">
-                  <label class="form-label">Type de consultation *</label>
-                  <select class="form-select" formControlName="typeConsultation">
-                    <option value="GENERALE">Consultation générale - 5 000 FCFA</option>
-                    <option value="SPECIALISEE">Consultation spécialisée - 10 000 FCFA</option>
-                  </select>
+              <div class="col-md-6" *ngIf="form.controls.suite.value">
+                <label class="form-label">
+                  Montant {{ form.controls.suite.value === 'RENDEZVOUS' ? 'du rendez-vous' : 'de la consultation' }} (FCFA) *
+                </label>
+                <input type="number" min="0" class="form-control" formControlName="montant">
+                <div class="invalid-feedback d-block" *ngIf="form.controls.montant.touched && form.controls.montant.invalid">
+                  Montant obligatoire et positif.
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label">Prix de la consultation (FCFA)</label>
-                  <input type="number" min="0" class="form-control" formControlName="montantConsultation">
-                </div>
-              </ng-container>
+              </div>
             </div>
-            <div class="text-muted small mt-2">Une notification sera envoyée à l'administrateur et au médecin sélectionné.</div>
+            <div class="text-muted small mt-2" *ngIf="form.controls.suite.value">
+              Le montant sera enregistré en comptabilité. Une notification sera envoyée à l'administrateur et au médecin sélectionné.
+            </div>
           </div>
         </div>
 
@@ -171,7 +176,7 @@ export class PatientFormComponent implements OnInit {
     dureeMinutes: [30],
     motifRendezVous: ['']
     ,typeConsultation: ['GENERALE']
-    ,montantConsultation: [5000, [Validators.required, Validators.min(0)]]
+    ,montant: [5000 as number | null, [Validators.required, Validators.min(0)]]
   });
 
   constructor(
@@ -189,26 +194,42 @@ export class PatientFormComponent implements OnInit {
       this.patientId = +idParam;
       this.patientService.findById(this.patientId).subscribe((p) => this.form.patchValue(p as any));
     }
-    if (this.auth.hasRole('RECEPTIONNISTE')) {
+    if (!this.patientId) {
       this.utilisateurService.findMedecins().subscribe((medecins) => (this.medecins = medecins));
+    }
+  }
+
+  /** Le réceptionniste doit obligatoirement orienter le patient ; pour les autres rôles c'est facultatif. */
+  get suiteObligatoire(): boolean {
+    return this.auth.hasRole('RECEPTIONNISTE');
+  }
+
+  majMontantParDefaut(): void {
+    const { suite, typeConsultation } = this.form.getRawValue();
+    if (suite === 'CONSULTATION') {
+      this.form.controls.montant.setValue(typeConsultation === 'SPECIALISEE' ? 10000 : 5000);
     }
   }
 
   enregistrer(): void {
     if (this.form.invalid) return;
     const donnees = this.form.getRawValue() as any;
-    if (!this.patientId && this.auth.hasRole('RECEPTIONNISTE') && (!donnees.suite || !donnees.medecinId ||
+    if (!this.patientId && this.suiteObligatoire && !donnees.suite) {
+      this.erreur = 'Veuillez choisir le type de dossier (consultation ou rendez-vous).';
+      return;
+    }
+    if (!this.patientId && donnees.suite && (!donnees.medecinId ||
       (donnees.suite === 'RENDEZVOUS' && !donnees.dateHeure))) {
-      this.erreur = 'Veuillez choisir le type de dossier et le médecin concerné.';
+      this.erreur = 'Veuillez choisir le médecin concerné' + (donnees.suite === 'RENDEZVOUS' ? ' et la date du rendez-vous.' : '.');
       return;
     }
     this.erreur = '';
-    const { suite, medecinId, dateHeure, dureeMinutes, motifRendezVous, typeConsultation, montantConsultation, ...patient } = donnees;
+    const { suite, medecinId, dateHeure, dureeMinutes, motifRendezVous, typeConsultation, montant, ...patient } = donnees;
 
     const operation = this.patientId
-      ? this.patientService.update(this.patientId, donnees)
-      : this.patientService.create(patient, suite, Number(medecinId),
-        suite === 'CONSULTATION' ? { type: typeConsultation, montant: Number(montantConsultation) } : undefined,
+      ? this.patientService.update(this.patientId, patient)
+      : this.patientService.create(patient, suite || undefined, medecinId ? Number(medecinId) : undefined,
+        suite ? { type: suite === 'CONSULTATION' ? typeConsultation : undefined, montant: Number(montant) } : undefined,
         suite === 'RENDEZVOUS'
           ? { dateHeure: `${dateHeure}:00`, dureeMinutes: Number(dureeMinutes || 30), motif: motifRendezVous }
           : undefined);

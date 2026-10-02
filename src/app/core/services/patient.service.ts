@@ -25,11 +25,12 @@ export class PatientService {
     return this.http.get<Patient>(`${this.apiUrl}/${id}`);
   }
 
-  create(patient: Patient, suite?: string, medecinId?: number, consultation?: { type: string; montant: number }, rendezVous?: { dateHeure: string; dureeMinutes: number; motif: string }): Observable<Patient> {
+  create(patient: Patient, suite?: string, medecinId?: number, consultation?: { type?: string; montant: number }, rendezVous?: { dateHeure: string; dureeMinutes: number; motif: string }): Observable<Patient> {
     let params = new HttpParams();
     if (suite) params = params.set('suite', suite);
     if (medecinId) params = params.set('medecinId', medecinId);
-    if (consultation) params = params.set('typeConsultation', consultation.type).set('montantConsultation', consultation.montant);
+    if (consultation?.type) params = params.set('typeConsultation', consultation.type);
+    if (consultation) params = params.set('montant', consultation.montant);
     if (rendezVous?.dateHeure) params = params.set('dateHeure', rendezVous.dateHeure);
     if (rendezVous) params = params.set('dureeMinutes', rendezVous.dureeMinutes).set('motif', rendezVous.motif || '');
     return this.http.post<Patient>(this.apiUrl, patient, { params });

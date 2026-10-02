@@ -71,6 +71,37 @@ import { interval, Subscription } from 'rxjs';
       </div>
     </div>
 
+    <div class="row g-3 mt-1" *ngIf="stats && auth.hasRole('ADMIN')">
+      <div class="col-md-6 col-lg-3">
+        <div class="card card-stat p-3 text-center">
+          <i class="bi bi-wallet2 fs-2 text-success"></i>
+          <h4 class="mt-2 mb-0">{{ stats.encaissementsAujourdhui | number:'1.0-0' }}</h4>
+          <small class="text-muted">Encaissé aujourd'hui (FCFA)</small>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="card card-stat p-3 text-center">
+          <i class="bi bi-journal-medical fs-2 text-primary"></i>
+          <h4 class="mt-2 mb-0">{{ stats.encaissementsConsultations | number:'1.0-0' }}</h4>
+          <small class="text-muted">Consultations encaissées (FCFA)</small>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="card card-stat p-3 text-center">
+          <i class="bi bi-calendar-check fs-2 text-info"></i>
+          <h4 class="mt-2 mb-0">{{ stats.encaissementsRendezVous | number:'1.0-0' }}</h4>
+          <small class="text-muted">Rendez-vous encaissés (FCFA)</small>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <a routerLink="/comptabilite" class="card card-stat p-3 text-center text-decoration-none h-100">
+          <i class="bi bi-calculator fs-2 text-secondary"></i>
+          <h4 class="mt-2 mb-0">{{ stats.encaissementsTotal | number:'1.0-0' }}</h4>
+          <small class="text-muted">Total accueil — voir la comptabilité</small>
+        </a>
+      </div>
+    </div>
+
     <div class="row mt-4 g-3">
       <div class="col-md-3">
         <a routerLink="/patients/nouveau" class="btn btn-outline-primary w-100 py-3">

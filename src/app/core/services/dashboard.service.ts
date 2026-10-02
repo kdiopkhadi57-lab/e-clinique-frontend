@@ -10,6 +10,10 @@ export interface DashboardStats {
   facturesEnAttente: number;
   medicamentsEnAlerte: number;
   chiffreAffaires: number;
+  encaissementsTotal: number;
+  encaissementsAujourdhui: number;
+  encaissementsConsultations: number;
+  encaissementsRendezVous: number;
 }
 
 @Injectable({ providedIn: 'root' })

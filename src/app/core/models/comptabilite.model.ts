@@ -2,6 +2,11 @@ export interface ComptabiliteResume {
   totalFactures: number;
   totalConsultations: number;
   totalHospitalisations: number;
+  totalEncaissements: number;
+  encaissementsConsultations: number;
+  encaissementsRendezVous: number;
+  encaissementsAujourdhui: number;
+  totalRecettes: number;
   totalPaiementsEmployes: number;
   solde: number;
 }
@@ -14,4 +19,17 @@ export interface PaiementEmploye {
   periode: string;
   motif?: string;
   datePaiement: string;
+}
+
+export interface Encaissement {
+  id: number;
+  type: 'CONSULTATION' | 'RENDEZVOUS';
+  montant: number;
+  patientId?: number;
+  patientNom: string;
+  numeroDossier?: string;
+  medecinNom?: string;
+  typeConsultation?: string;
+  enregistreParNom?: string;
+  dateEncaissement: string;
 }
