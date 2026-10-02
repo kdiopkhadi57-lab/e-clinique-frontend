@@ -3,49 +3,50 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { TraduirePipe } from '../../../core/i18n/traduire.pipe';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TraduirePipe],
   template: `
     <div class="login-wrapper d-flex align-items-center justify-content-center">
       <div class="login-shell shadow">
         <section class="medical-banner" aria-label="Espace médical E-Clinique">
           <img src="assets/login-clinic.png" alt="Accueil de la clinique E-Clinique">
-          <div class="medical-banner-caption"><i class="bi bi-shield-check"></i><span>Des soins de qualité,<br>un service de confiance</span></div>
+          <div class="medical-banner-caption"><i class="bi bi-shield-check"></i><span>{{ 'login.slogan1' | t }}<br>{{ 'login.slogan2' | t }}</span></div>
         </section>
 
         <section class="login-panel">
           <div class="text-center mb-4">
             <div class="login-icon"><i class="bi bi-hospital"></i></div>
-            <h3 class="mt-3 mb-1 fw-bold">Bienvenue</h3>
-            <p class="text-muted mb-0">Connectez-vous à votre espace<br><strong class="brand-name">e-Clinique</strong></p>
+            <h3 class="mt-3 mb-1 fw-bold">{{ 'login.bienvenue' | t }}</h3>
+            <p class="text-muted mb-0">{{ 'login.connectez' | t }}<br><strong class="brand-name">e-Clinique</strong></p>
           </div>
 
-          <div class="alert alert-danger" *ngIf="erreur">{{ erreur }}</div>
-          <div class="alert alert-success" *ngIf="messageOubli">{{ messageOubli }}</div>
+          <div class="alert alert-danger" *ngIf="erreur">{{ erreur | t }}</div>
+          <div class="alert alert-success" *ngIf="messageOubli">{{ messageOubli | t }}</div>
 
           <form [formGroup]="form" (ngSubmit)="seConnecter()">
             <div class="mb-3">
-              <label class="form-label visually-hidden" for="username">Nom d'utilisateur</label>
-              <div class="input-with-icon"><i class="bi bi-person"></i><input id="username" type="text" class="form-control" placeholder="Nom d'utilisateur" formControlName="username" autocomplete="username"></div>
+              <label class="form-label visually-hidden" for="username">{{ 'login.identifiant' | t }}</label>
+              <div class="input-with-icon"><i class="bi bi-person"></i><input id="username" type="text" class="form-control" [placeholder]="'login.identifiant' | t" formControlName="username" autocomplete="username"></div>
             </div>
             <div class="mb-3">
-              <label class="form-label visually-hidden" for="password">Mot de passe</label>
-              <div class="input-with-icon"><i class="bi bi-lock"></i><input id="password" type="password" class="form-control" placeholder="Mot de passe" formControlName="password" autocomplete="current-password"></div>
+              <label class="form-label visually-hidden" for="password">{{ 'login.motDePasse' | t }}</label>
+              <div class="input-with-icon"><i class="bi bi-lock"></i><input id="password" type="password" class="form-control" [placeholder]="'login.motDePasse' | t" formControlName="password" autocomplete="current-password"></div>
             </div>
-            <div class="login-options"><label><input type="checkbox"> <span>Se souvenir de moi</span></label><button type="button" (click)="motDePasseOublie()">Mot de passe oublié ?</button></div>
+            <div class="login-options"><label><input type="checkbox"> <span>{{ 'login.souvenir' | t }}</span></label><button type="button" (click)="motDePasseOublie()">{{ 'login.oublie' | t }}</button></div>
             <button type="submit" class="btn btn-primary w-100" [disabled]="form.invalid || chargement">
               <span *ngIf="chargement" class="spinner-border spinner-border-sm me-2"></span>
-              Se connecter
+              {{ 'login.seConnecter' | t }}
             </button>
           </form>
 
           <div class="text-center mt-4 small text-muted">
-            Compte de démonstration : <strong>admin</strong> / <strong>Admin&#64;123</strong>
+            {{ 'login.demo' | t }} <strong>admin</strong> / <strong>Admin&#64;123</strong>
           </div>
-          <div class="login-footer">© 2024 e-Clinique. Tous droits réservés.</div>
+          <div class="login-footer">© 2024 e-Clinique. {{ 'login.droits' | t }}</div>
         </section>
       </div>
     </div>
@@ -145,13 +146,13 @@ export class LoginComponent {
       },
       error: () => {
         this.chargement = false;
-        this.erreur = "Nom d'utilisateur ou mot de passe incorrect.";
+        this.erreur = 'login.erreur';
       }
     });
   }
 
   motDePasseOublie(): void {
     this.erreur = '';
-    this.messageOubli = "Contactez l'administrateur pour réinitialiser votre mot de passe.";
+    this.messageOubli = 'login.contactAdmin';
   }
 }

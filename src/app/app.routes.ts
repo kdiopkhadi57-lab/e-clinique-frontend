@@ -151,6 +151,11 @@ export const routes: Routes = [
     canActivate: [roleGuard(['ADMIN'])],
     loadComponent: () => import('./features/audit/audit-log-list/audit-log-list.component').then(m => m.AuditLogListComponent)
   },
+  {
+    path: 'profil',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/profil/profil.component').then(m => m.ProfilComponent)
+  },
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   { path: '**', redirectTo: 'dashboard' }
 ];

@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, ElementRef, Input, NgZone, OnChanges, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TraduirePipe } from '../../core/i18n/traduire.pipe';
 
 export interface SerieGraphique {
   nom: string;
@@ -17,7 +18,7 @@ interface Segment { x: number; y: number; largeur: number; hauteur: number; coul
 @Component({
   selector: 'app-bar-chart',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TraduirePipe],
   template: `
     <figure class="viz">
       <figcaption class="viz-head">
@@ -27,7 +28,7 @@ interface Segment { x: number; y: number; largeur: number; hauteur: number; coul
         </div>
         <button type="button" class="viz-toggle" (click)="vueTableau = !vueTableau">
           <i class="bi" [class.bi-table]="!vueTableau" [class.bi-bar-chart]="vueTableau"></i>
-          {{ vueTableau ? 'Graphique' : 'Tableau' }}
+          {{ (vueTableau ? 'graph.graphique' : 'graph.tableau') | t }}
         </button>
       </figcaption>
 
@@ -53,7 +54,7 @@ interface Segment { x: number; y: number; largeur: number; hauteur: number; coul
         <div class="viz-tip" *ngIf="survol !== null" [style.left.%]="tipX" [class.gauche]="tipX > 60">
           <strong>{{ libelles[survol] }}</strong>
           <div *ngFor="let s of series" class="ligne"><i [style.background]="s.couleur"></i><span>{{ s.nom }}</span><b>{{ s.valeurs[survol] | number:'1.0-0' }}</b></div>
-          <div *ngIf="empile && series.length > 1" class="ligne total"><span>Total</span><b>{{ totalEmpile(survol) | number:'1.0-0' }}</b></div>
+          <div *ngIf="empile && series.length > 1" class="ligne total"><span>{{ 'graph.total' | t }}</span><b>{{ totalEmpile(survol) | number:'1.0-0' }}</b></div>
           <div *ngFor="let s of infos" class="ligne"><span>{{ s.nom }}</span><b>{{ s.valeurs[survol] | number:'1.0-0' }}</b></div>
           <small>{{ unite }}</small>
         </div>
@@ -61,8 +62,8 @@ interface Segment { x: number; y: number; largeur: number; hauteur: number; coul
 
       <div class="table-responsive" *ngIf="vueTableau">
         <table class="table table-sm mb-0">
-          <thead><tr><th>Période</th><th class="text-end" *ngFor="let s of series">{{ s.nom }}</th>
-            <th class="text-end" *ngIf="empile && series.length > 1">Total</th><th class="text-end" *ngFor="let s of infos">{{ s.nom }}</th></tr></thead>
+          <thead><tr><th>{{ 'graph.periode' | t }}</th><th class="text-end" *ngFor="let s of series">{{ s.nom }}</th>
+            <th class="text-end" *ngIf="empile && series.length > 1">{{ 'graph.total' | t }}</th><th class="text-end" *ngFor="let s of infos">{{ s.nom }}</th></tr></thead>
           <tbody>
             <tr *ngFor="let lib of libelles; let i = index">
               <td>{{ lib }}</td>

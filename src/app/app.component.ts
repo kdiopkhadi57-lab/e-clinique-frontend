@@ -1,15 +1,18 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { NgIf } from '@angular/common';
 import { NavbarComponent } from './shared/navbar/navbar.component';
+import { TopbarComponent } from './shared/topbar/topbar.component';
 import { AuthService } from './core/services/auth.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NavbarComponent],
+  imports: [RouterOutlet, NgIf, NavbarComponent, TopbarComponent],
   template: `
     <app-navbar></app-navbar>
     <main class="app-content" [class.with-sidebar]="auth.isAuthenticated()">
+      <app-topbar *ngIf="auth.isAuthenticated()"></app-topbar>
       <router-outlet></router-outlet>
     </main>
   `,

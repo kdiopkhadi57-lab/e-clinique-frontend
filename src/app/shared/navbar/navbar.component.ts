@@ -6,14 +6,15 @@ import { Notification } from '../../core/models/notification.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { NotificationSoundService } from '../../core/services/notification-sound.service';
 import { interval, Subscription } from 'rxjs';
+import { TraduirePipe } from '../../core/i18n/traduire.pipe';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterLink, RouterLinkActive, TraduirePipe],
   template: `
     <ng-container *ngIf="auth.isAuthenticated()">
-      <button class="sidebar-toggle no-print" type="button" (click)="menuOuvert = !menuOuvert" aria-label="Ouvrir le menu">
+      <button class="sidebar-toggle no-print" type="button" (click)="menuOuvert = !menuOuvert" [attr.aria-label]="'nav.ouvrirMenu' | t">
         <i class="bi bi-list"></i>
       </button>
       <div class="sidebar-backdrop no-print" *ngIf="menuOuvert" (click)="menuOuvert = false"></div>
@@ -24,43 +25,43 @@ import { interval, Subscription } from 'rxjs';
             <span class="brand-mark"><i class="bi bi-heart-pulse"></i></span>
             <span>
               <strong>E-Clinique</strong>
-              <small>Backoffice médical</small>
+              <small>{{ 'nav.backoffice' | t }}</small>
             </span>
           </a>
         </div>
 
-        <div class="sidebar-section-label">Navigation</div>
+        <div class="sidebar-section-label">{{ 'nav.navigation' | t }}</div>
         <nav class="sidebar-nav" aria-label="Navigation principale">
           <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="fermerMenu()">
-            <i class="bi bi-grid-1x2-fill"></i><span>Tableau de bord</span>
+            <i class="bi bi-grid-1x2-fill"></i><span>{{ 'nav.dashboard' | t }}</span>
           </a>
           <a routerLink="/patients" routerLinkActive="active" (click)="fermerMenu()">
-            <i class="bi bi-people-fill"></i><span>Patients</span>
+            <i class="bi bi-people-fill"></i><span>{{ 'nav.patients' | t }}</span>
           </a>
           <a *ngIf="auth.hasRole('RECEPTIONNISTE')" routerLink="/tickets" routerLinkActive="active" (click)="fermerMenu()">
-            <i class="bi bi-ticket-perforated-fill"></i><span>Tickets</span>
+            <i class="bi bi-ticket-perforated-fill"></i><span>{{ 'nav.tickets' | t }}</span>
           </a>
           <a routerLink="/consultations" routerLinkActive="active" (click)="fermerMenu()">
-            <i class="bi bi-journal-medical"></i><span>Consultations</span>
+            <i class="bi bi-journal-medical"></i><span>{{ 'nav.consultations' | t }}</span>
           </a>
           <a routerLink="/rendezvous" routerLinkActive="active" (click)="fermerMenu()">
-            <i class="bi bi-calendar2-check-fill"></i><span>Rendez-vous</span>
+            <i class="bi bi-calendar2-check-fill"></i><span>{{ 'nav.rendezvous' | t }}</span>
           </a>
           <a routerLink="/factures" routerLinkActive="active" (click)="fermerMenu()">
-            <i class="bi bi-receipt-cutoff"></i><span>Factures</span>
+            <i class="bi bi-receipt-cutoff"></i><span>{{ 'nav.factures' | t }}</span>
           </a>
           <a *ngIf="auth.hasRole('ADMIN','RECEPTIONNISTE')" routerLink="/factures-organismes" routerLinkActive="active" (click)="fermerMenu()">
-            <i class="bi bi-building-check"></i><span>Factures IPM / assurances</span>
+            <i class="bi bi-building-check"></i><span>{{ 'nav.facturesOrganismes' | t }}</span>
           </a>
           <a routerLink="/hospitalisations" routerLinkActive="active" (click)="fermerMenu()">
-            <i class="bi bi-hospital-fill"></i><span>Hospitalisation</span>
+            <i class="bi bi-hospital-fill"></i><span>{{ 'nav.hospitalisation' | t }}</span>
           </a>
           <a *ngIf="auth.hasRole('ADMIN','PHARMACIEN')" routerLink="/pharmacie" routerLinkActive="active" (click)="fermerMenu()">
-            <i class="bi bi-capsule-pill"></i><span>Pharmacie / Stock</span>
+            <i class="bi bi-capsule-pill"></i><span>{{ 'nav.pharmacie' | t }}</span>
           </a>
           <div *ngIf="auth.hasRole('RECEPTIONNISTE')" class="notification-panel">
             <button type="button" class="notification-button" (click)="notificationsOuvertes = !notificationsOuvertes">
-              <i class="bi bi-exclamation-triangle-fill"></i><span>Documents à imprimer</span>
+              <i class="bi bi-exclamation-triangle-fill"></i><span>{{ 'nav.documentsImprimer' | t }}</span>
               <span class="notification-badge" *ngIf="nonLues > 0">{{ nonLues }}</span>
             </button>
             <div class="notification-list" *ngIf="notificationsOuvertes">
@@ -68,7 +69,7 @@ import { interval, Subscription } from 'rxjs';
                 <i class="bi" [class.bi-printer]="notification.type === 'CONSULTATION' || notification.type === 'PATIENT_CONSULTATION'" [class.bi-receipt]="notification.type === 'FACTURE'" [class.bi-calendar-check]="notification.type === 'PATIENT_RENDEZVOUS'"></i>
                 <span>{{ notification.message }}<small>{{ notification.dateCreation | date:'dd/MM/yyyy HH:mm' }}</small></span>
               </button>
-              <p class="notification-empty" *ngIf="notifications.length === 0">Aucun ticket en attente.</p>
+              <p class="notification-empty" *ngIf="notifications.length === 0">{{ 'nav.aucunTicket' | t }}</p>
               <div class="notification-pagination" *ngIf="ticketTotalPages > 1">
                 <button type="button" (click)="ticketPage = ticketPage - 1" [disabled]="ticketPage === 1">‹</button>
                 <span>{{ ticketPage }} / {{ ticketTotalPages }}</span>
@@ -77,31 +78,19 @@ import { interval, Subscription } from 'rxjs';
             </div>
           </div>
           <a *ngIf="auth.hasRole('ADMIN')" routerLink="/audit" routerLinkActive="active" (click)="fermerMenu()">
-            <i class="bi bi-shield-check"></i><span>Journal d'audit</span>
+            <i class="bi bi-shield-check"></i><span>{{ 'nav.audit' | t }}</span>
           </a>
           <a *ngIf="auth.hasRole('ADMIN')" routerLink="/comptabilite" routerLinkActive="active" (click)="fermerMenu()">
-            <i class="bi bi-calculator"></i><span>Comptabilité</span>
+            <i class="bi bi-calculator"></i><span>{{ 'nav.comptabilite' | t }}</span>
           </a>
           <a *ngIf="auth.hasRole('ADMIN')" routerLink="/organismes" routerLinkActive="active" (click)="fermerMenu()">
-            <i class="bi bi-building"></i><span>Assurances & IPM</span>
+            <i class="bi bi-building"></i><span>{{ 'nav.organismes' | t }}</span>
           </a>
           <a *ngIf="auth.hasRole('ADMIN')" routerLink="/employes" routerLinkActive="active" (click)="fermerMenu()">
-            <i class="bi bi-person-badge"></i><span>Employés</span>
+            <i class="bi bi-person-badge"></i><span>{{ 'nav.employes' | t }}</span>
           </a>
         </nav>
 
-        <div class="sidebar-footer">
-          <div class="user-summary">
-            <span class="user-avatar"><i class="bi bi-person-fill"></i></span>
-            <span class="user-details">
-              <strong>{{ auth.currentUser()?.prenom }} {{ auth.currentUser()?.nom }}</strong>
-              <small>{{ auth.currentUser()?.role }}</small>
-            </span>
-          </div>
-          <button class="logout-button" type="button" (click)="deconnexion()">
-            <i class="bi bi-box-arrow-right"></i><span>Déconnexion</span>
-          </button>
-        </div>
       </aside>
     </ng-container>
   `
@@ -238,9 +227,4 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.menuOuvert = false;
   }
 
-  deconnexion(): void {
-    this.fermerMenu();
-    this.auth.logout();
-    this.router.navigate(['/login']);
-  }
 }

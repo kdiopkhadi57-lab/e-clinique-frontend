@@ -37,6 +37,14 @@ export class AuthService {
     this.currentUser.set(null);
   }
 
+  mettreAJourIdentite(nom: string, prenom: string): void {
+    const actuel = this.currentUser();
+    if (!actuel) return;
+    const maj = { ...actuel, nom, prenom };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(maj));
+    this.currentUser.set(maj);
+  }
+
   getToken(): string | null {
     return this.currentUser()?.token ?? null;
   }
