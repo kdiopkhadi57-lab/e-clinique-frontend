@@ -6,6 +6,8 @@ import { PatientService } from '../../../core/services/patient.service';
 import { UtilisateurService } from '../../../core/services/utilisateur.service';
 import { Utilisateur } from '../../../core/models/user.model';
 import { AuthService } from '../../../core/services/auth.service';
+import { OrganismeService } from '../../../core/services/organisme.service';
+import { Organisme, TypeOrganisme } from '../../../core/models/organisme.model';
 
 @Component({
   selector: 'app-patient-form',
@@ -84,6 +86,27 @@ import { AuthService } from '../../../core/services/auth.service';
               Numéro de téléphone invalide.
             </div>
           </div>
+          <div class="col-12 border-top pt-3">
+            <h6 class="text-primary">Prise en charge</h6>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Assureur / IPM</label>
+                <select class="form-select" formControlName="organismeId" (change)="majPartOrganisme()">
+                  <option value="">Aucun — paiement comptant</option>
+                  <optgroup label="Assurances">
+                    <option *ngFor="let o of organismesParType('ASSURANCE')" [value]="o.id">{{ o.nom }} ({{ o.tauxPriseEnCharge }} %)</option>
+                  </optgroup>
+                  <optgroup label="IPM d'entreprise">
+                    <option *ngFor="let o of organismesParType('IPM')" [value]="o.id">{{ o.nom }} ({{ o.tauxPriseEnCharge }} %)</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div class="col-md-6" *ngIf="form.controls.organismeId.value">
+                <label class="form-label">Matricule / N° d'adhérent</label>
+                <input class="form-control" formControlName="matriculeAssure" placeholder="ex : ICS-4521">
+              </div>
+            </div>
+          </div>
           <div class="col-12 border-top pt-3" *ngIf="!patientId">
             <h6 class="text-primary">Suite à donner au patient</h6>
             <div class="row g-3">
@@ -127,10 +150,24 @@ import { AuthService } from '../../../core/services/auth.service';
                 <label class="form-label">
                   Montant {{ form.controls.suite.value === 'RENDEZVOUS' ? 'du rendez-vous' : 'de la consultation' }} (FCFA) *
                 </label>
-                <input type="number" min="0" class="form-control" formControlName="montant">
+                <input type="number" min="0" class="form-control" formControlName="montant" (input)="majPartOrganisme()">
                 <div class="invalid-feedback d-block" *ngIf="form.controls.montant.touched && form.controls.montant.invalid">
                   Montant obligatoire et positif.
                 </div>
+              </div>
+            </div>
+            <div class="row g-3 mt-0" *ngIf="form.controls.suite.value && organismeChoisi as o">
+              <div class="col-md-6">
+                <label class="form-label">Prix pris en charge par {{ o.nom }} (FCFA) *</label>
+                <input type="number" min="0" class="form-control" formControlName="partOrganisme">
+                <div class="form-text">Taux par défaut : {{ o.tauxPriseEnCharge }} % du montant.</div>
+                <div class="invalid-feedback d-block" *ngIf="partOrganismeInvalide">
+                  Le prix pris en charge doit être compris entre 0 et le montant.
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Reste à payer par le patient</label>
+                <div class="form-control bg-light fw-semibold">{{ resteAPayer | number:'1.0-0' }} FCFA</div>
               </div>
             </div>
             <div class="text-muted small mt-2" *ngIf="form.controls.suite.value">
@@ -155,6 +192,7 @@ export class PatientFormComponent implements OnInit {
   patientId: number | null = null;
   groupesSanguins = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
   medecins: Utilisateur[] = [];
+  organismes: Organisme[] = [];
   erreur = '';
 
   form = this.fb.group({
@@ -177,12 +215,16 @@ export class PatientFormComponent implements OnInit {
     motifRendezVous: ['']
     ,typeConsultation: ['GENERALE']
     ,montant: [5000 as number | null, [Validators.required, Validators.min(0)]]
+    ,organismeId: ['' as string | number]
+    ,matriculeAssure: ['']
+    ,partOrganisme: [null as number | null]
   });
 
   constructor(
     private fb: FormBuilder,
     private patientService: PatientService,
     private utilisateurService: UtilisateurService,
+    private organismeService: OrganismeService,
     private route: ActivatedRoute,
     private router: Router,
     public auth: AuthService
@@ -192,8 +234,10 @@ export class PatientFormComponent implements OnInit {
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
       this.patientId = +idParam;
-      this.patientService.findById(this.patientId).subscribe((p) => this.form.patchValue(p as any));
+      this.patientService.findById(this.patientId).subscribe((p) =>
+        this.form.patchValue({ ...(p as any), organismeId: p.organisme?.id ?? '' }));
     }
+    this.organismeService.findAll(true).subscribe((organismes) => (this.organismes = organismes));
     if (!this.patientId) {
       this.utilisateurService.findMedecins().subscribe((medecins) => (this.medecins = medecins));
     }
@@ -209,6 +253,32 @@ export class PatientFormComponent implements OnInit {
     if (suite === 'CONSULTATION') {
       this.form.controls.montant.setValue(typeConsultation === 'SPECIALISEE' ? 10000 : 5000);
     }
+    this.majPartOrganisme();
+  }
+
+  organismesParType(type: TypeOrganisme): Organisme[] {
+    return this.organismes.filter((o) => o.type === type);
+  }
+
+  get organismeChoisi(): Organisme | undefined {
+    const id = Number(this.form.controls.organismeId.value);
+    return id ? this.organismes.find((o) => o.id === id) : undefined;
+  }
+
+  /** Le prix pris en charge suit le taux de l'organisme ; l'utilisateur peut ensuite l'ajuster. */
+  majPartOrganisme(): void {
+    const o = this.organismeChoisi;
+    const montant = Number(this.form.controls.montant.value) || 0;
+    this.form.controls.partOrganisme.setValue(o ? Math.round(montant * o.tauxPriseEnCharge / 100) : null);
+  }
+
+  get resteAPayer(): number {
+    return (Number(this.form.controls.montant.value) || 0) - (Number(this.form.controls.partOrganisme.value) || 0);
+  }
+
+  get partOrganismeInvalide(): boolean {
+    const part = this.form.controls.partOrganisme.value;
+    return part == null || part < 0 || part > (Number(this.form.controls.montant.value) || 0);
   }
 
   enregistrer(): void {
@@ -223,13 +293,24 @@ export class PatientFormComponent implements OnInit {
       this.erreur = 'Veuillez choisir le médecin concerné' + (donnees.suite === 'RENDEZVOUS' ? ' et la date du rendez-vous.' : '.');
       return;
     }
+    if (!this.patientId && donnees.suite && this.organismeChoisi && this.partOrganismeInvalide) {
+      this.erreur = 'Le prix pris en charge par l\'assureur doit être compris entre 0 et le montant.';
+      return;
+    }
     this.erreur = '';
-    const { suite, medecinId, dateHeure, dureeMinutes, motifRendezVous, typeConsultation, montant, ...patient } = donnees;
+    const { suite, medecinId, dateHeure, dureeMinutes, motifRendezVous, typeConsultation, montant,
+      organismeId, partOrganisme, ...patient } = donnees;
+    patient.organisme = organismeId ? { id: Number(organismeId) } : null;
+    if (!organismeId) patient.matriculeAssure = '';
 
     const operation = this.patientId
       ? this.patientService.update(this.patientId, patient)
       : this.patientService.create(patient, suite || undefined, medecinId ? Number(medecinId) : undefined,
-        suite ? { type: suite === 'CONSULTATION' ? typeConsultation : undefined, montant: Number(montant) } : undefined,
+        suite ? {
+          type: suite === 'CONSULTATION' ? typeConsultation : undefined,
+          montant: Number(montant),
+          partOrganisme: organismeId ? Number(partOrganisme) : undefined
+        } : undefined,
         suite === 'RENDEZVOUS'
           ? { dateHeure: `${dateHeure}:00`, dureeMinutes: Number(dureeMinutes || 30), motif: motifRendezVous }
           : undefined);

@@ -1,3 +1,5 @@
+import { Organisme } from './organisme.model';
+
 export type Sexe = 'HOMME' | 'FEMME';
 
 export interface Patient {
@@ -15,5 +17,7 @@ export interface Patient {
   antecedentsMedicaux?: string;
   personneAContacter?: string;
   telephonePersonneAContacter?: string;
+  organisme?: Organisme | null;
+  matriculeAssure?: string;
   dateCreation?: string;
 }

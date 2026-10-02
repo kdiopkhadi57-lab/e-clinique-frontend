@@ -6,11 +6,13 @@ import { AuthService } from '../../core/services/auth.service';
 import { Notification } from '../../core/models/notification.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { interval, Subscription } from 'rxjs';
+import { BarChartComponent, SerieGraphique } from '../../shared/bar-chart/bar-chart.component';
+import { ComptabiliteService } from '../../core/services/comptabilite.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, BarChartComponent],
   template: `
     <h3 class="mb-4">Bonjour, {{ auth.currentUser()?.prenom }} 👋</h3>
 
@@ -94,12 +96,18 @@ import { interval, Subscription } from 'rxjs';
         </div>
       </div>
       <div class="col-md-6 col-lg-3">
-        <a routerLink="/comptabilite" class="card card-stat p-3 text-center text-decoration-none h-100">
-          <i class="bi bi-calculator fs-2 text-secondary"></i>
-          <h4 class="mt-2 mb-0">{{ stats.encaissementsTotal | number:'1.0-0' }}</h4>
-          <small class="text-muted">Total accueil — voir la comptabilité</small>
+        <a routerLink="/organismes" class="card card-stat p-3 text-center text-decoration-none h-100">
+          <i class="bi bi-building fs-2 text-secondary"></i>
+          <h4 class="mt-2 mb-0">{{ stats.priseEnChargeOrganismes | number:'1.0-0' }}</h4>
+          <small class="text-muted">Pris en charge assurances / IPM (FCFA)</small>
         </a>
       </div>
+    </div>
+
+    <div class="card p-3 mt-3" *ngIf="auth.hasRole('ADMIN') && libellesBilan.length">
+      <app-bar-chart [titre]="'Recettes par mois — ' + anneeCourante" sousTitre="FCFA · détail par trimestre, semestre et année dans la Comptabilité"
+                     [empile]="true" [libelles]="libellesBilan" [series]="seriesRecettes" />
+      <div class="text-end mt-2"><a routerLink="/comptabilite" class="small">Voir tous les bilans <i class="bi bi-arrow-right"></i></a></div>
     </div>
 
     <div class="row mt-4 g-3">
@@ -136,13 +144,26 @@ import { interval, Subscription } from 'rxjs';
 export class DashboardComponent implements OnInit, OnDestroy {
   stats: DashboardStats | null = null;
   alertes: Notification[] = [];
+  anneeCourante = new Date().getFullYear();
+  libellesBilan: string[] = [];
+  seriesRecettes: SerieGraphique[] = [];
   private notificationsSubscription?: Subscription;
 
   constructor(private dashboardService: DashboardService, public auth: AuthService,
-              private notificationService: NotificationService, private router: Router) {}
+              private notificationService: NotificationService, private router: Router,
+              private comptabiliteService: ComptabiliteService) {}
 
   ngOnInit(): void {
     this.dashboardService.stats().subscribe((s) => (this.stats = s));
+    if (this.auth.hasRole('ADMIN')) {
+      this.comptabiliteService.bilan('MOIS', this.anneeCourante).subscribe((b) => {
+        this.libellesBilan = b.map((x) => x.libelle);
+        this.seriesRecettes = [
+          { nom: 'Payé par les patients', couleur: '#2a78d6', valeurs: b.map((x) => x.recettesPatients) },
+          { nom: 'Assurances / IPM', couleur: '#eb6834', valeurs: b.map((x) => x.recettesOrganismes) },
+          { nom: 'Factures', couleur: '#1baf7a', valeurs: b.map((x) => x.recettesFactures) }];
+      });
+    }
     if (this.auth.hasRole('ADMIN', 'MEDECIN')) {
       this.chargerAlertes();
       this.notificationsSubscription = interval(30000).subscribe(() => this.chargerAlertes());

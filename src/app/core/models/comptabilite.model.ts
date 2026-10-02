@@ -6,6 +6,10 @@ export interface ComptabiliteResume {
   encaissementsConsultations: number;
   encaissementsRendezVous: number;
   encaissementsAujourdhui: number;
+  totalPartPatients: number;
+  totalPartOrganismes: number;
+  creancesOrganismesEnAttente: number;
+  creancesOrganismesPayees: number;
   totalRecettes: number;
   totalPaiementsEmployes: number;
   solde: number;
@@ -32,4 +36,25 @@ export interface Encaissement {
   typeConsultation?: string;
   enregistreParNom?: string;
   dateEncaissement: string;
+  organismeId?: number;
+  organismeNom?: string;
+  partOrganisme: number;
+  partPatient: number;
+  matriculeAssure?: string;
+  factureOrganismeId?: number;
+}
+
+export type PeriodeBilan = 'MOIS' | 'TRIMESTRE' | 'SEMESTRE' | 'ANNEE';
+
+export interface BilanPeriode {
+  libelle: string;
+  debut: string;
+  fin: string;
+  recettesPatients: number;
+  recettesOrganismes: number;
+  recettesFactures: number;
+  totalRecettes: number;
+  depenses: number;
+  solde: number;
+  nombreActes: number;
 }

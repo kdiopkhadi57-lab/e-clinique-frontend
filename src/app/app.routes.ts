@@ -132,6 +132,21 @@ export const routes: Routes = [
     loadComponent: () => import('./features/comptabilite/comptabilite.component').then(m => m.ComptabiliteComponent)
   },
   {
+    path: 'organismes',
+    canActivate: [roleGuard(['ADMIN'])],
+    loadComponent: () => import('./features/organismes/organismes.component').then(m => m.OrganismesComponent)
+  },
+  {
+    path: 'factures-organismes',
+    canActivate: [roleGuard(['ADMIN', 'RECEPTIONNISTE'])],
+    loadComponent: () => import('./features/factures-organismes/facture-organisme-list.component').then(m => m.FactureOrganismeListComponent)
+  },
+  {
+    path: 'factures-organismes/:id',
+    canActivate: [roleGuard(['ADMIN', 'RECEPTIONNISTE'])],
+    loadComponent: () => import('./features/factures-organismes/facture-organisme-detail.component').then(m => m.FactureOrganismeDetailComponent)
+  },
+  {
     path: 'audit',
     canActivate: [roleGuard(['ADMIN'])],
     loadComponent: () => import('./features/audit/audit-log-list/audit-log-list.component').then(m => m.AuditLogListComponent)

@@ -14,6 +14,7 @@ export interface DashboardStats {
   encaissementsAujourdhui: number;
   encaissementsConsultations: number;
   encaissementsRendezVous: number;
+  priseEnChargeOrganismes: number;
 }
 
 @Injectable({ providedIn: 'root' })

@@ -49,6 +49,9 @@ import { interval, Subscription } from 'rxjs';
           <a routerLink="/factures" routerLinkActive="active" (click)="fermerMenu()">
             <i class="bi bi-receipt-cutoff"></i><span>Factures</span>
           </a>
+          <a *ngIf="auth.hasRole('ADMIN','RECEPTIONNISTE')" routerLink="/factures-organismes" routerLinkActive="active" (click)="fermerMenu()">
+            <i class="bi bi-building-check"></i><span>Factures IPM / assurances</span>
+          </a>
           <a routerLink="/hospitalisations" routerLinkActive="active" (click)="fermerMenu()">
             <i class="bi bi-hospital-fill"></i><span>Hospitalisation</span>
           </a>
@@ -78,6 +81,9 @@ import { interval, Subscription } from 'rxjs';
           </a>
           <a *ngIf="auth.hasRole('ADMIN')" routerLink="/comptabilite" routerLinkActive="active" (click)="fermerMenu()">
             <i class="bi bi-calculator"></i><span>Comptabilité</span>
+          </a>
+          <a *ngIf="auth.hasRole('ADMIN')" routerLink="/organismes" routerLinkActive="active" (click)="fermerMenu()">
+            <i class="bi bi-building"></i><span>Assurances & IPM</span>
           </a>
           <a *ngIf="auth.hasRole('ADMIN')" routerLink="/employes" routerLinkActive="active" (click)="fermerMenu()">
             <i class="bi bi-person-badge"></i><span>Employés</span>
