@@ -34,9 +34,10 @@ import { AuthService } from '../../../core/services/auth.service';
       <div class="alert alert-danger no-print" *ngIf="erreurSuppression">{{ erreurSuppression }}</div>
 
       <div class="row g-3 mb-4">
-        <div class="col-md-6">
+        <div class="col-lg-4 col-md-6">
           <div class="card p-3 h-100">
             <h6 class="text-primary">Informations générales</h6>
+            <p class="mb-1"><strong>Dossier créé le :</strong> {{ patient.dateCreation ? (patient.dateCreation | date:'dd/MM/yyyy à HH:mm') : '-' }}</p>
             <p class="mb-1"><strong>Date de naissance :</strong> {{ patient.dateNaissance || '-' }}</p>
             <p class="mb-1"><strong>Sexe :</strong> {{ patient.sexe || '-' }}</p>
             <p class="mb-1"><strong>Groupe sanguin :</strong> {{ patient.groupeSanguin || '-' }}</p>
@@ -45,7 +46,20 @@ import { AuthService } from '../../../core/services/auth.service';
             <p class="mb-0"><strong>Adresse :</strong> {{ patient.adresse || '-' }}</p>
           </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-lg-4 col-md-6">
+          <div class="card p-3 h-100">
+            <h6 class="text-primary">Prise en charge</h6>
+            <ng-container *ngIf="patient.organisme as o; else comptant">
+              <p class="mb-1"><strong>Assureur / IPM :</strong> {{ o.nom }}
+                <span class="badge ms-1" [class.bg-primary]="o.type === 'ASSURANCE'" [class.bg-info]="o.type === 'IPM'">
+                  {{ o.type === 'IPM' ? 'IPM' : 'Assurance' }}</span></p>
+              <p class="mb-1"><strong>Taux de prise en charge :</strong> {{ o.tauxPriseEnCharge }} %</p>
+              <p class="mb-0"><strong>Matricule :</strong> {{ patient.matriculeAssure || '-' }}</p>
+            </ng-container>
+            <ng-template #comptant><p class="mb-0 text-muted">Aucun assureur — paiement comptant.</p></ng-template>
+          </div>
+        </div>
+        <div class="col-lg-4 col-md-12">
           <div class="card p-3 h-100">
             <h6 class="text-primary">Informations médicales</h6>
             <p class="mb-1"><strong>Allergies :</strong> {{ patient.allergies || 'Aucune connue' }}</p>

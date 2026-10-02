@@ -54,6 +54,8 @@ import { PaginationComponent } from '../../../shared/pagination/pagination.compo
               <th>Téléphone</th>
               <th>Sexe</th>
               <th>Groupe sanguin</th>
+              <th>Assureur / IPM</th>
+              <th>Créé le</th>
               <th class="text-end">Actions</th>
             </tr>
           </thead>
@@ -65,7 +67,9 @@ import { PaginationComponent } from '../../../shared/pagination/pagination.compo
               <td>{{ p.telephone || '-' }}</td>
               <td>{{ p.sexe || '-' }}</td>
               <td>{{ p.groupeSanguin || '-' }}</td>
-              <td class="text-end">
+              <td>{{ p.organisme?.nom || 'Comptant' }}</td>
+              <td class="text-nowrap">{{ p.dateCreation ? (p.dateCreation | date:'dd/MM/yyyy') : '-' }}</td>
+              <td class="text-end text-nowrap">
                 <a [routerLink]="['/patients', p.id]" class="btn btn-sm btn-outline-primary me-1" title="Dossier">
                   <i class="bi bi-eye"></i>
                 </a>
@@ -79,7 +83,7 @@ import { PaginationComponent } from '../../../shared/pagination/pagination.compo
               </td>
             </tr>
             <tr *ngIf="patients.length === 0">
-              <td colspan="7" class="text-center text-muted py-4">Aucun patient trouvé</td>
+              <td colspan="9" class="text-center text-muted py-4">Aucun patient trouvé</td>
             </tr>
           </tbody>
         </table>
