@@ -59,8 +59,9 @@ import { EnvoiEmailComponent } from '../../../shared/envoi-email/envoi-email.com
 
       <div class="invoice-page">
         <header class="invoice-header">
-          <div class="clinic-header" aria-label="SEYNI SY MEDICAL">
-            <div class="clinic-name">SEYNI SY MEDICAL</div>
+          <div class="clinic-header" aria-label="CABINET MEDICAL DEMBA BODIEL SY">
+            <img class="clinic-logo" src="assets/logo-embleme.png" alt="Logo Cabinet Médical Demba Bodiel SY">
+            <div class="clinic-name">CABINET MEDICAL DEMBA BODIEL SY</div>
             <div class="clinic-address">Darou Khoudoss route de Mboro</div>
             <div class="clinic-authorization">Aut N° : 3682 du 30/03/15</div>
             <div class="clinic-phone">Tel : 77 519 35 11 / 76 353 48 42</div>
@@ -197,6 +198,8 @@ import { EnvoiEmailComponent } from '../../../shared/envoi-email/envoi-email.com
         background: #f3f3f3;
         text-align: center;
       }
+
+      .clinic-logo { display: block; height: 72px; margin: 0 auto 6px; }
 
       .clinic-header {
         color: #111;

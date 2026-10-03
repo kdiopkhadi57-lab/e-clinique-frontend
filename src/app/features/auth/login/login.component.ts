@@ -12,16 +12,16 @@ import { TraduirePipe } from '../../../core/i18n/traduire.pipe';
   template: `
     <div class="login-wrapper d-flex align-items-center justify-content-center">
       <div class="login-shell shadow">
-        <section class="medical-banner" aria-label="Espace médical E-Clinique">
-          <img src="assets/login-clinic.png" alt="Accueil de la clinique E-Clinique">
+        <section class="medical-banner" aria-label="Espace médical Cabinet Médical Demba Bodiel SY">
+          <img src="assets/login-clinic.png" alt="Accueil du Cabinet Médical Demba Bodiel SY">
           <div class="medical-banner-caption"><i class="bi bi-shield-check"></i><span>{{ 'login.slogan1' | t }}<br>{{ 'login.slogan2' | t }}</span></div>
         </section>
 
         <section class="login-panel">
           <div class="text-center mb-4">
-            <div class="login-icon"><i class="bi bi-hospital"></i></div>
+            <img class="login-logo" src="assets/logo.png" alt="Logo Cabinet Médical Demba Bodiel SY">
             <h3 class="mt-3 mb-1 fw-bold">{{ 'login.bienvenue' | t }}</h3>
-            <p class="text-muted mb-0">{{ 'login.connectez' | t }}<br><strong class="brand-name">e-Clinique</strong></p>
+            <p class="text-muted mb-0">{{ 'login.connectez' | t }}<br><strong class="brand-name">Cabinet Médical Demba Bodiel SY</strong></p>
           </div>
 
           <div class="alert alert-danger" *ngIf="erreur">{{ erreur | t }}</div>
@@ -46,7 +46,7 @@ import { TraduirePipe } from '../../../core/i18n/traduire.pipe';
           <div class="text-center mt-4 small text-muted">
             {{ 'login.demo' | t }} <strong>admin</strong> / <strong>Admin&#64;123</strong>
           </div>
-          <div class="login-footer">© 2024 e-Clinique. {{ 'login.droits' | t }}</div>
+          <div class="login-footer">© 2024 Cabinet Médical Demba Bodiel SY. {{ 'login.droits' | t }}</div>
         </section>
       </div>
     </div>
@@ -82,7 +82,7 @@ import { TraduirePipe } from '../../../core/i18n/traduire.pipe';
     .monitor-card strong { color: #fff; font-size: .8rem; font-weight: 500; }
     .banner-cross { right: 3rem; top: 18%; display: grid; place-items: center; width: 82px; height: 82px; border: 1px solid rgba(255,255,255,.25); border-radius: 24px; color: rgba(255,255,255,.65); transform: rotate(12deg); font-size: 4rem; }
     .login-panel { display: flex; flex-direction: column; justify-content: center; padding: 3.5rem 3.25rem; }
-    .login-icon { display: inline-grid; place-items: center; width: 64px; height: 64px; color: #1169c9; background: #e8f2ff; border-radius: 50%; font-size: 1.75rem; }
+    .login-logo { display: block; width: 110px; height: auto; margin: 0 auto; }
     .login-panel h3 { color: #0b7a53; font-size: 2rem; }
     .brand-name { color: #0b7a53; font-weight: 700; }
     .login-panel .form-control { min-height: 50px; border-color: #d3dfed; color: #244b75; }

@@ -56,7 +56,8 @@ import { EnvoiEmailComponent } from '../../shared/envoi-email/envoi-email.compon
 
       <div class="facture-org">
         <header class="entete">
-          <div class="clinique">SEYNI SY MEDICAL</div>
+          <img class="logo" src="assets/logo-embleme.png" alt="Logo Cabinet Médical Demba Bodiel SY">
+          <div class="clinique">CABINET MEDICAL DEMBA BODIEL SY</div>
           <div class="italique">Darou Khoudoss route de Mboro</div>
           <div class="italique">Aut N° : 3682 du 30/03/15</div>
           <div class="italique">Tel : 77 519 35 11 / 76 353 48 42</div>
@@ -114,6 +115,7 @@ import { EnvoiEmailComponent } from '../../shared/envoi-email/envoi-email.compon
   styles: [`
     .facture-org { background: #fff; border: 2px solid #2f7d5a; padding: 0 0 24px; color: #1d1d1d; }
     .entete { text-align: center; padding: 14px 24px 8px; font-family: Georgia, 'Times New Roman', serif; }
+    .logo { display: block; height: 72px; margin: 0 auto 6px; }
     .clinique { font-family: Arial, sans-serif; font-size: 1.9rem; font-weight: 900; letter-spacing: .02em; }
     .italique { font-style: italic; }
     .titre { text-align: center; font-size: 1.35rem; font-weight: 800; padding: 6px; border-top: 3px solid #2f7d5a; border-bottom: 3px solid #2f7d5a; }

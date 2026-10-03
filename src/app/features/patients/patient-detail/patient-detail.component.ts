@@ -109,8 +109,9 @@ import { AuthService } from '../../../core/services/auth.service';
 
       <section class="ordonnance-print" *ngIf="ordonnance">
         <div class="ordonnance-header">
+          <img class="ordonnance-logo" src="assets/logo-embleme.png" alt="Logo Cabinet Médical Demba Bodiel SY">
           <h2>CONSULTATION</h2>
-          <p>SEYNI SY MEDICAL</p>
+          <p>CABINET MEDICAL DEMBA BODIEL SY</p>
         </div>
         <div class="ordonnance-infos">
           <p><strong>Patient :</strong> {{ patient?.prenom }} {{ patient?.nom }}</p>
@@ -156,6 +157,7 @@ import { AuthService } from '../../../core/services/auth.service';
       body.impression-ordonnance .ordonnance-print,
       body.impression-ordonnance .ordonnance-print * { visibility: visible !important; }
       body.impression-ordonnance .ordonnance-print { display: block; position: absolute; inset: 0; padding: 12mm 14mm; color: #111; background: #fff; font-family: Arial, sans-serif; font-size: 12px; }
+      .ordonnance-logo { display: block; height: 60px; margin: 0 auto 4px; }
       .ordonnance-header { border-bottom: 2px solid #2f7d5a; text-align: center; }
       .ordonnance-header h2 { margin: 0; color: #111 !important; }
       .ordonnance-header p { margin: 3px 0 7px; color: #2f7d5a; font-weight: 700; }

@@ -20,7 +20,8 @@ import { ConsultationService } from '../../../core/services/consultation.service
 
     <article *ngIf="consultation" class="ticket">
       <div class="clinic-header">
-        <div class="clinic-name">CLINIQUE LA REFERENCE</div>
+        <img class="clinic-logo" src="assets/logo-embleme.png" alt="Logo Cabinet Médical Demba Bodiel SY">
+        <div class="clinic-name">CABINET MEDICAL DEMBA BODIEL SY</div>
         <div>BP 1234, Dakar - Tél : +221 33 000 00 00</div>
         <div>NIF : 001234567 | RCCM : SN DKR...</div>
       </div>
@@ -65,6 +66,7 @@ import { ConsultationService } from '../../../core/services/consultation.service
   styles: [`
     .ticket-actions { display: flex; justify-content: flex-end; max-width: 620px; margin: 0 auto 16px; }
     .ticket { width: min(100%, 620px); margin: 0 auto; padding: 24px 28px; border: 1px solid #222; color: #111; background: #fff; }
+    .clinic-logo { display: block; height: 56px; margin: 0 auto 4px; }
     .clinic-header { text-align: center; margin-bottom: 8px; color: #111; font-size: .8rem; line-height: 1.25; }
     .clinic-name { font-size: 1.35rem; font-weight: 900; letter-spacing: 0.03em; }
     .document-title, .section-title { font-weight: 800; text-align: center; }

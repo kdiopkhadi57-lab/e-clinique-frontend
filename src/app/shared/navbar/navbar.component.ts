@@ -22,9 +22,9 @@ import { TraduirePipe } from '../../core/i18n/traduire.pipe';
       <aside class="sidebar-eclinique no-print" [class.open]="menuOuvert">
         <div class="sidebar-brand">
           <a routerLink="/dashboard" (click)="fermerMenu()">
-            <span class="brand-mark"><i class="bi bi-heart-pulse"></i></span>
+            <img class="brand-mark" src="assets/logo-embleme-sombre.png" alt="Logo Cabinet Médical Demba Bodiel SY">
             <span>
-              <strong>E-Clinique</strong>
+              <strong>Demba Bodiel SY</strong>
               <small>{{ 'nav.backoffice' | t }}</small>
             </span>
           </a>
@@ -111,7 +111,7 @@ import { TraduirePipe } from '../../core/i18n/traduire.pipe';
 
     .sidebar-brand { padding: 0 .75rem 1.75rem; }
     .sidebar-brand a { display: flex; align-items: center; gap: .75rem; color: #fff; text-decoration: none; }
-    .brand-mark { display: grid; place-items: center; width: 42px; height: 42px; color: #07513a; background: #a8e6c5; border-radius: 12px; font-size: 1.25rem; }
+    .brand-mark { flex-shrink: 0; width: 46px; height: 46px; object-fit: contain; }
     .sidebar-brand strong, .sidebar-brand small, .user-details strong, .user-details small { display: block; }
     .sidebar-brand strong { font-size: 1.1rem; letter-spacing: .01em; }
     .sidebar-brand small { margin-top: .15rem; color: #a8d6bf; font-size: .72rem; }
