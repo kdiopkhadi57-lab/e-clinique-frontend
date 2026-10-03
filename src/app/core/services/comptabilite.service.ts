@@ -25,5 +25,7 @@ export class ComptabiliteService {
     return this.http.get<{ content: Utilisateur[]; totalPages: number; totalElements: number }>(`${this.usersUrl}/employes/page?page=${page}&size=${size}`);
   }
   creerEmploye(employe: any): Observable<Utilisateur> { return this.http.post<Utilisateur>(this.usersUrl, employe); }
+  modifierEmploye(id: number, employe: any): Observable<Utilisateur> { return this.http.put<Utilisateur>(`${this.usersUrl}/${id}`, employe); }
+  supprimerEmploye(id: number): Observable<void> { return this.http.delete<void>(`${this.usersUrl}/${id}`); }
   payer(request: any): Observable<PaiementEmploye> { return this.http.post<PaiementEmploye>(`${this.apiUrl}/paiements`, request); }
 }
