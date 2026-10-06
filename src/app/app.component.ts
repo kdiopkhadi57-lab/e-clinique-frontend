@@ -30,14 +30,14 @@ import { TableauxMobilesService } from './core/services/tableaux-mobiles.service
       padding: 0;
     }
 
-    @media (min-width: 992px) {
+    @media (min-width: 992px) and (hover: hover), (min-width: 992px) and (pointer: fine) {
       .app-content.with-sidebar {
         margin-left: 276px;
       }
     }
 
     /* Smartphones et tablettes : marges réduites et place pour la barre d'onglets du bas. */
-    @media (max-width: 991.98px) {
+    @media (max-width: 991.98px), (hover: none) and (pointer: coarse) {
       /* Rien ne doit élargir la page : sinon le téléphone dézoome tout l'écran. */
       .app-content {
         overflow-x: clip;

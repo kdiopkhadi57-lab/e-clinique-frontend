@@ -76,7 +76,7 @@ import { TraduirePipe } from '../../core/i18n/traduire.pipe';
     .menu .deconnexion i { color: #b02a37; }
     .marque-mobile { display: none; }
     /* Sur smartphone et tablette, la barre devient l'en-tête fixe de l'application. */
-    @media (max-width: 991.98px) {
+    @media (max-width: 991.98px), (hover: none) and (pointer: coarse) {
       .topbar { position: sticky; top: 0; z-index: 1020; margin: -1rem calc(-1 * max(1rem, env(safe-area-inset-right))) 1rem calc(-1 * max(1rem, env(safe-area-inset-left))); padding: calc(.5rem + env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) .5rem max(1rem, env(safe-area-inset-left)); border-bottom: 1px solid rgba(11, 81, 59, .08); background: rgba(243, 248, 245, .9); backdrop-filter: saturate(180%) blur(16px); -webkit-backdrop-filter: saturate(180%) blur(16px); }
       .marque-mobile { display: flex; align-items: center; gap: .5rem; min-width: 0; margin-right: auto; color: #07513a; font-weight: 700; text-decoration: none; }
       .marque-mobile img { width: 34px; height: 34px; object-fit: contain; }

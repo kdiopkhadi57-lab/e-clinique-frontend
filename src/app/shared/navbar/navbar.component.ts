@@ -167,7 +167,7 @@ import { MiseEnPageService } from '../../core/services/mise-en-page.service';
     .logout-button:hover { color: #fff; background: rgba(255, 255, 255, .08); }
     .sidebar-backdrop, .sidebar-close, .tabbar { display: none; }
 
-    @media (max-width: 991.98px) {
+    @media (max-width: 991.98px), (hover: none) and (pointer: coarse) {
       .sidebar-eclinique { width: min(300px, 86vw); padding-top: calc(1.25rem + env(safe-area-inset-top)); padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)); overflow-y: auto; overscroll-behavior: contain; transform: translateX(-100%); transition: transform .28s cubic-bezier(.2, .8, .2, 1); }
       .sidebar-eclinique.open { transform: translateX(0); box-shadow: 18px 0 40px rgba(3, 30, 23, .3); }
       .sidebar-brand { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding-bottom: 1.25rem; }
@@ -185,6 +185,13 @@ import { MiseEnPageService } from '../../core/services/mise-en-page.service';
       .tabbar .active::before { position: absolute; top: 0; width: 28px; height: 3px; border-radius: 0 0 3px 3px; content: ''; background: #0b7a53; }
       .tabbar a:active, .tabbar button:active { background: rgba(11, 122, 83, .08); }
       .tab-badge { position: absolute; top: 4px; left: calc(50% + 6px); min-width: 18px; padding: 0 .3rem; border-radius: 9px; color: #fff; background: #dc3545; font-size: .62rem; line-height: 18px; text-align: center; }
+    }
+
+    /* Tablettes (iPad, Android) : onglets centrés et plus lisibles, comme dans les applications iPadOS. */
+    @media (min-width: 768px) and (max-width: 991.98px), (min-width: 768px) and (hover: none) and (pointer: coarse) {
+      .tabbar { grid-template-columns: repeat(5, minmax(0, 140px)); justify-content: center; gap: .5rem; }
+      .tabbar a, .tabbar button { min-height: 56px; font-size: .78rem; }
+      .tabbar i { font-size: 1.4rem; }
     }
 
     @keyframes fondu { from { opacity: 0; } to { opacity: 1; } }

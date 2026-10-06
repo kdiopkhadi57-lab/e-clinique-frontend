@@ -114,7 +114,7 @@ body.menu-mobile-ouvert {
   .app-content > router-outlet + * { animation: none; }
 }
 
-@media (max-width: 991.98px) {
+@media (max-width: 991.98px), (hover: none) and (pointer: coarse) {
   /* 16px minimum : évite le zoom automatique de Safari iOS au toucher d'un champ. */
   .form-control, .form-select, .form-control-sm, .form-select-sm,
   input:not([type="checkbox"]):not([type="radio"]), select, textarea {

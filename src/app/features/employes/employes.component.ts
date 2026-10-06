@@ -85,7 +85,7 @@ type Popup = 'detail' | 'modification' | 'suppression';
 `, styles: [`
   /* Le fond ne couvre que la zone de contenu : sur grand écran il commence après le sidebar (276px). */
   .popup-fond { position: fixed; inset: 0; z-index: 1040; display: flex; align-items: center; justify-content: center; padding: 1rem; background: rgba(15, 35, 28, .45); }
-  @media (min-width: 992px) { .popup-fond { left: 276px; } }
+  @media (min-width: 992px) and (hover: hover), (min-width: 992px) and (pointer: fine) { .popup-fond { left: 276px; } }
   /* Le popup ne dépasse jamais la hauteur de l'écran : seul son corps défile. */
   .popup { display: flex; flex-direction: column; width: min(640px, 100%); max-height: calc(100dvh - 2rem); border-radius: 12px; background: #fff; box-shadow: 0 18px 45px rgba(0, 0, 0, .2); }
   .popup-petit { width: min(440px, 100%); }
