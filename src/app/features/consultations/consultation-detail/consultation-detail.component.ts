@@ -263,6 +263,9 @@ import { ConsultationService } from '../../../core/services/consultation.service
       .bill-top, .constants-grid { grid-template-columns: 1fr; gap: 10px; }
       .detail-row { grid-template-columns: 1fr; gap: 2px; }
       .consultation-sheet { padding: 0 0 20px; }
+      .sheet-footer { flex-direction: column; align-items: stretch; }
+      .signature-block, .clinic-footer { min-width: 0; }
+      table { display: block; overflow-x: auto; font-size: .85rem; }
     }
 
     @media print {

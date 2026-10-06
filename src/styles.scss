@@ -123,17 +123,21 @@ body.menu-mobile-ouvert {
 
   .form-control, .form-select { min-height: 44px; }
   .btn { min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: .35rem; }
+  .btn:has(> .d-block) { flex-direction: column; }
   .btn-sm { min-height: 36px; min-width: 36px; }
   .btn-close { width: 1.25rem; height: 1.25rem; padding: .6rem; }
 
   .card { border-radius: 14px; }
   .alert { border-radius: 12px; }
-  .nav-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
-  .nav-tabs::-webkit-scrollbar { display: none; }
-  .nav-tabs .nav-link { white-space: nowrap; }
+  /* Onglets : se partagent la largeur, comme un sélecteur segmenté. */
+  .nav-tabs { flex-wrap: nowrap; }
+  .nav-tabs > .nav-item { flex: 1 1 0; min-width: 0; }
+  .nav-tabs .nav-link { width: 100%; height: 100%; padding: .55rem .4rem; font-size: .85rem; text-align: center; }
 
   /* En-têtes d'écran (titre + actions) : les boutons passent à la ligne au lieu de déborder. */
   .d-flex.justify-content-between { flex-wrap: wrap; gap: .75rem; }
+  /* Rangées de boutons d'action : passent à la ligne au lieu de sortir de l'écran. */
+  .d-flex:has(> .btn) { flex-wrap: wrap; }
   .input-group[style*="max-width"] { max-width: none !important; }
 }
 
@@ -213,5 +217,18 @@ body.menu-mobile-ouvert {
   }
   .table-responsive > .table > tbody > tr > td:has(.form-control, .form-select)::before { max-width: none; margin-right: 0; }
 
-  .table-responsive > .table > tfoot > tr { display: flex; justify-content: space-between; padding: .5rem .9rem; }
+  /* Ligne de total : carte récapitulative mise en avant. */
+  .table-responsive > .table > tfoot { display: block; }
+  .table-responsive > .table > tfoot > tr {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: .25rem 1rem;
+    padding: .65rem .9rem;
+    border-radius: 14px;
+    background: #e3f1ea;
+    font-weight: 700;
+  }
+  .table-responsive > .table > tfoot > tr > * { display: block; padding: 0; border: 0; background: transparent; box-shadow: none; }
+  .table-responsive > .table > tfoot > tr > :empty { display: none; }
 }

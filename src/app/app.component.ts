@@ -38,7 +38,9 @@ import { TableauxMobilesService } from './core/services/tableaux-mobiles.service
 
     /* Smartphones et tablettes : marges réduites et place pour la barre d'onglets du bas. */
     @media (max-width: 991.98px) {
+      /* Rien ne doit élargir la page : sinon le téléphone dézoome tout l'écran. */
       .app-content {
+        overflow-x: clip;
         padding: 1rem max(1rem, env(safe-area-inset-right)) calc(5.5rem + env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
       }
     }

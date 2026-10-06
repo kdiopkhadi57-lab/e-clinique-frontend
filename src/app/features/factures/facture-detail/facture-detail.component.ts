@@ -375,6 +375,15 @@ import { EnvoiEmailComponent } from '../../../shared/envoi-email/envoi-email.com
         margin: 0;
       }
 
+      /* Smartphone : le document tient dans la largeur de l'écran. */
+      @media (max-width: 575.98px) {
+        .bill-top { grid-template-columns: 1fr; }
+        .bill-top .bill-box + .bill-box { border-left: 0; border-top: 2px solid #2f7d5a; }
+        .items-table { font-size: .8rem; }
+        .table-row { grid-template-columns: minmax(0, 2fr) .45fr 1fr 1fr; }
+        .header-row > div, .body-row > div, .subtotal-row > div, .tax-row > div, .total-row > div { padding: 6px; overflow-wrap: anywhere; }
+      }
+
       @media print {
         body {
           background: #fff;

@@ -31,43 +31,43 @@ import { I18nService } from '../../core/i18n/i18n.service';
     </div>
 
     <div class="row g-3" *ngIf="stats">
-      <div class="col-md-4 col-lg-2">
-        <div class="card card-stat p-3 text-center">
+      <div class="col-6 col-md-4 col-lg-2">
+        <div class="card card-stat p-3 text-center h-100">
           <i class="bi bi-people fs-2 text-primary"></i>
           <h4 class="mt-2 mb-0">{{ stats.totalPatients }}</h4>
           <small class="text-muted">{{ 'dash.patients' | t }}</small>
         </div>
       </div>
-      <div class="col-md-4 col-lg-2">
-        <div class="card card-stat p-3 text-center">
+      <div class="col-6 col-md-4 col-lg-2">
+        <div class="card card-stat p-3 text-center h-100">
           <i class="bi bi-calendar-day fs-2 text-info"></i>
           <h4 class="mt-2 mb-0">{{ stats.rendezVousAujourdhui }}</h4>
           <small class="text-muted">{{ 'dash.rdvAujourdhui' | t }}</small>
         </div>
       </div>
-      <div class="col-md-4 col-lg-2">
-        <div class="card card-stat p-3 text-center">
+      <div class="col-6 col-md-4 col-lg-2">
+        <div class="card card-stat p-3 text-center h-100">
           <i class="bi bi-calendar-check fs-2 text-secondary"></i>
           <h4 class="mt-2 mb-0">{{ stats.rendezVousPlanifies }}</h4>
           <small class="text-muted">{{ 'dash.rdvPlanifies' | t }}</small>
         </div>
       </div>
-      <div class="col-md-4 col-lg-2">
-        <div class="card card-stat p-3 text-center">
+      <div class="col-6 col-md-4 col-lg-2">
+        <div class="card card-stat p-3 text-center h-100">
           <i class="bi bi-receipt fs-2 text-warning"></i>
           <h4 class="mt-2 mb-0">{{ stats.facturesEnAttente }}</h4>
           <small class="text-muted">{{ 'dash.facturesAttente' | t }}</small>
         </div>
       </div>
-      <div class="col-md-4 col-lg-2">
-        <div class="card card-stat p-3 text-center">
+      <div class="col-6 col-md-4 col-lg-2">
+        <div class="card card-stat p-3 text-center h-100">
           <i class="bi bi-exclamation-triangle fs-2 text-danger"></i>
           <h4 class="mt-2 mb-0">{{ stats.medicamentsEnAlerte }}</h4>
           <small class="text-muted">{{ 'dash.stocksAlerte' | t }}</small>
         </div>
       </div>
-      <div class="col-md-4 col-lg-2">
-        <div class="card card-stat p-3 text-center">
+      <div class="col-6 col-md-4 col-lg-2">
+        <div class="card card-stat p-3 text-center h-100">
           <i class="bi bi-cash-coin fs-2 text-success"></i>
           <h4 class="mt-2 mb-0">{{ stats.chiffreAffaires | number:'1.0-0' }}</h4>
           <small class="text-muted">{{ 'dash.ca' | t }}</small>
@@ -76,28 +76,28 @@ import { I18nService } from '../../core/i18n/i18n.service';
     </div>
 
     <div class="row g-3 mt-1" *ngIf="stats && auth.hasRole('ADMIN')">
-      <div class="col-md-6 col-lg-3">
-        <div class="card card-stat p-3 text-center">
+      <div class="col-6 col-md-6 col-lg-3">
+        <div class="card card-stat p-3 text-center h-100">
           <i class="bi bi-wallet2 fs-2 text-success"></i>
           <h4 class="mt-2 mb-0">{{ stats.encaissementsAujourdhui | number:'1.0-0' }}</h4>
           <small class="text-muted">{{ 'dash.encaisseJour' | t }}</small>
         </div>
       </div>
-      <div class="col-md-6 col-lg-3">
-        <div class="card card-stat p-3 text-center">
+      <div class="col-6 col-md-6 col-lg-3">
+        <div class="card card-stat p-3 text-center h-100">
           <i class="bi bi-journal-medical fs-2 text-primary"></i>
           <h4 class="mt-2 mb-0">{{ stats.encaissementsConsultations | number:'1.0-0' }}</h4>
           <small class="text-muted">{{ 'dash.consultationsEncaissees' | t }}</small>
         </div>
       </div>
-      <div class="col-md-6 col-lg-3">
-        <div class="card card-stat p-3 text-center">
+      <div class="col-6 col-md-6 col-lg-3">
+        <div class="card card-stat p-3 text-center h-100">
           <i class="bi bi-calendar-check fs-2 text-info"></i>
           <h4 class="mt-2 mb-0">{{ stats.encaissementsRendezVous | number:'1.0-0' }}</h4>
           <small class="text-muted">{{ 'dash.rdvEncaisses' | t }}</small>
         </div>
       </div>
-      <div class="col-md-6 col-lg-3">
+      <div class="col-6 col-md-6 col-lg-3">
         <a routerLink="/organismes" class="card card-stat p-3 text-center text-decoration-none h-100">
           <i class="bi bi-building fs-2 text-secondary"></i>
           <h4 class="mt-2 mb-0">{{ stats.priseEnChargeOrganismes | number:'1.0-0' }}</h4>
@@ -113,23 +113,23 @@ import { I18nService } from '../../core/i18n/i18n.service';
     </div>
 
     <div class="row mt-4 g-3">
-      <div class="col-md-3">
-        <a routerLink="/patients/nouveau" class="btn btn-outline-primary w-100 py-3">
+      <div class="col-6 col-md-3">
+        <a routerLink="/patients/nouveau" class="btn btn-outline-primary w-100 h-100 py-3">
           <i class="bi bi-person-plus fs-4 d-block mb-1"></i> {{ 'dash.nouveauPatient' | t }}
         </a>
       </div>
-      <div class="col-md-3">
-        <a routerLink="/rendezvous/nouveau" class="btn btn-outline-primary w-100 py-3">
+      <div class="col-6 col-md-3">
+        <a routerLink="/rendezvous/nouveau" class="btn btn-outline-primary w-100 h-100 py-3">
           <i class="bi bi-calendar-plus fs-4 d-block mb-1"></i> {{ 'dash.nouveauRdv' | t }}
         </a>
       </div>
-      <div class="col-md-3">
-        <a routerLink="/factures/nouvelle" class="btn btn-outline-primary w-100 py-3">
+      <div class="col-6 col-md-3">
+        <a routerLink="/factures/nouvelle" class="btn btn-outline-primary w-100 h-100 py-3">
           <i class="bi bi-file-earmark-plus fs-4 d-block mb-1"></i> {{ 'dash.nouvelleFacture' | t }}
         </a>
       </div>
-      <div class="col-md-3" *ngIf="auth.hasRole('ADMIN','PHARMACIEN')">
-        <a routerLink="/pharmacie" class="btn btn-outline-primary w-100 py-3">
+      <div class="col-6 col-md-3" *ngIf="auth.hasRole('ADMIN','PHARMACIEN')">
+        <a routerLink="/pharmacie" class="btn btn-outline-primary w-100 h-100 py-3">
           <i class="bi bi-capsule fs-4 d-block mb-1"></i> {{ 'dash.pharmacie' | t }}
         </a>
       </div>
@@ -141,6 +141,13 @@ import { I18nService } from '../../core/i18n/i18n.service';
     .dashboard-alert:hover { background: rgba(255, 255, 255, .9); }
     .dashboard-alert i { color: #9a7400; }
     .dashboard-alert small { display: block; color: #806d35; }
+    /* Smartphone : tuiles compactes sur deux colonnes, comme l'écran d'accueil d'une application. */
+    @media (max-width: 575.98px) {
+      .card-stat { padding: .85rem .6rem !important; }
+      .card-stat .fs-2 { font-size: 1.45rem !important; }
+      .card-stat h4 { font-size: 1.15rem; }
+      .card-stat small { display: block; font-size: .72rem; line-height: 1.25; }
+    }
   `]
 })
 export class DashboardComponent implements OnInit, OnDestroy {

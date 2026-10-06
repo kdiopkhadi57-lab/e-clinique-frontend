@@ -133,6 +133,12 @@ import { EnvoiEmailComponent } from '../../shared/envoi-email/envoi-email.compon
     .arrete, .obs { margin: 0 18px 8px; }
     .signature { margin: 36px 48px 0 auto; width: 200px; text-align: center; font-weight: 700; border-top: 1px solid #999; padding-top: 6px; }
     @media (max-width: 700px) { .blocs { grid-template-columns: 1fr; } .blocs > div + div { border-left: 0; border-top: 3px solid #2f7d5a; } }
+    @media (max-width: 575.98px) {
+      .clinique { font-size: 1.35rem; }
+      .lignes { display: block; width: auto; margin: 14px 12px; overflow-x: auto; font-size: .8rem; }
+      .arrete, .obs { margin: 0 12px 8px; }
+      .signature { margin: 28px auto 0; }
+    }
     @media print { .facture-org { border-width: 1px; } .lignes { font-size: 10px; } }
   `]
 })

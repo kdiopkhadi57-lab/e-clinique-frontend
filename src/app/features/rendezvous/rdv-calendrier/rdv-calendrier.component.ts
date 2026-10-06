@@ -288,6 +288,8 @@ export class RdvCalendrierComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    // Sur smartphone, sept colonnes ne tiennent pas : on part de la vue du jour.
+    if (window.matchMedia('(max-width: 575.98px)').matches) this.vue = 'jour';
     try {
       const vue = localStorage.getItem('rdv-calendrier-vue') as Vue | null;
       if (vue === 'mois' || vue === 'semaine' || vue === 'jour') this.vue = vue;
