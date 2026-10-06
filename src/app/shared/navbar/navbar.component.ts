@@ -7,6 +7,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { NotificationSoundService } from '../../core/services/notification-sound.service';
 import { interval, Subscription } from 'rxjs';
 import { TraduirePipe } from '../../core/i18n/traduire.pipe';
+import { MiseEnPageService } from '../../core/services/mise-en-page.service';
 
 @Component({
   selector: 'app-navbar',
@@ -14,12 +15,9 @@ import { TraduirePipe } from '../../core/i18n/traduire.pipe';
   imports: [CommonModule, RouterLink, RouterLinkActive, TraduirePipe],
   template: `
     <ng-container *ngIf="auth.isAuthenticated()">
-      <button class="sidebar-toggle no-print" type="button" (click)="menuOuvert = !menuOuvert" [attr.aria-label]="'nav.ouvrirMenu' | t">
-        <i class="bi bi-list"></i>
-      </button>
-      <div class="sidebar-backdrop no-print" *ngIf="menuOuvert" (click)="menuOuvert = false"></div>
+      <div class="sidebar-backdrop no-print" *ngIf="miseEnPage.menuOuvert()" (click)="fermerMenu()"></div>
 
-      <aside class="sidebar-eclinique no-print" [class.open]="menuOuvert">
+      <aside class="sidebar-eclinique no-print" [class.open]="miseEnPage.menuOuvert()">
         <div class="sidebar-brand">
           <a routerLink="/dashboard" (click)="fermerMenu()">
             <img class="brand-mark" src="assets/logo-embleme-sombre.png" alt="Logo Cabinet Médical Demba Bodiel SY">
@@ -28,6 +26,9 @@ import { TraduirePipe } from '../../core/i18n/traduire.pipe';
               <small>{{ 'nav.backoffice' | t }}</small>
             </span>
           </a>
+          <button type="button" class="sidebar-close" (click)="fermerMenu()" [attr.aria-label]="'nav.fermerMenu' | t">
+            <i class="bi bi-x-lg"></i>
+          </button>
         </div>
 
         <div class="sidebar-section-label">{{ 'nav.navigation' | t }}</div>
@@ -92,6 +93,27 @@ import { TraduirePipe } from '../../core/i18n/traduire.pipe';
         </nav>
 
       </aside>
+
+      <!-- Barre d'onglets façon application mobile (smartphones et tablettes) -->
+      <nav class="tabbar no-print" aria-label="Navigation rapide">
+        <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+          <i class="bi bi-grid-1x2"></i><span>{{ 'nav.accueil' | t }}</span>
+        </a>
+        <a routerLink="/patients" routerLinkActive="active">
+          <i class="bi bi-people"></i><span>{{ 'nav.patients' | t }}</span>
+        </a>
+        <a routerLink="/rendezvous" routerLinkActive="active">
+          <i class="bi bi-calendar2-check"></i><span>{{ 'nav.rdvCourt' | t }}</span>
+        </a>
+        <a routerLink="/consultations" routerLinkActive="active">
+          <i class="bi bi-journal-medical"></i><span>{{ 'nav.consultations' | t }}</span>
+        </a>
+        <button type="button" [class.active]="miseEnPage.menuOuvert()" (click)="miseEnPage.basculerMenu()"
+                [attr.aria-expanded]="miseEnPage.menuOuvert()" [attr.aria-label]="'nav.ouvrirMenu' | t">
+          <i class="bi bi-list"></i><span>{{ 'nav.menu' | t }}</span>
+          <span class="tab-badge" *ngIf="nonLues > 0">{{ nonLues }}</span>
+        </button>
+      </nav>
     </ng-container>
   `
   ,
@@ -143,18 +165,32 @@ import { TraduirePipe } from '../../core/i18n/traduire.pipe';
     .user-details small { margin-top: .15rem; color: #8edbb3; font-size: .7rem; }
     .logout-button { width: 100%; color: #b9dccc; cursor: pointer; text-align: left; }
     .logout-button:hover { color: #fff; background: rgba(255, 255, 255, .08); }
-    .sidebar-toggle, .sidebar-backdrop { display: none; }
+    .sidebar-backdrop, .sidebar-close, .tabbar { display: none; }
 
     @media (max-width: 991.98px) {
-      .sidebar-eclinique { transform: translateX(-100%); transition: transform .25s ease; }
-      .sidebar-eclinique.open { transform: translateX(0); }
-      .sidebar-toggle { position: fixed; top: 1rem; left: 1rem; z-index: 1020; display: grid; place-items: center; width: 42px; height: 42px; border: 0; border-radius: 10px; color: #fff; background: #0b513b; box-shadow: 0 5px 15px rgba(7, 57, 45, .2); font-size: 1.35rem; }
-      .sidebar-backdrop { position: fixed; inset: 0; z-index: 1025; display: block; background: rgba(3, 30, 23, .45); }
+      .sidebar-eclinique { width: min(300px, 86vw); padding-top: calc(1.25rem + env(safe-area-inset-top)); padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)); overflow-y: auto; overscroll-behavior: contain; transform: translateX(-100%); transition: transform .28s cubic-bezier(.2, .8, .2, 1); }
+      .sidebar-eclinique.open { transform: translateX(0); box-shadow: 18px 0 40px rgba(3, 30, 23, .3); }
+      .sidebar-brand { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding-bottom: 1.25rem; }
+      .sidebar-close { display: grid; place-items: center; flex-shrink: 0; width: 38px; height: 38px; border: 0; border-radius: 50%; color: #fff; background: rgba(255, 255, 255, .1); }
+      .sidebar-nav a:hover { transform: none; }
+      .sidebar-backdrop { position: fixed; inset: 0; z-index: 1025; display: block; background: rgba(3, 30, 23, .45); animation: fondu .2s ease; }
+      .notification-list { position: static; width: auto; margin-top: .35rem; }
+
+      .tabbar { position: fixed; inset: auto 0 0 0; z-index: 1035; display: grid; grid-template-columns: repeat(5, 1fr); padding: .3rem .25rem calc(.3rem + env(safe-area-inset-bottom)); border-top: 1px solid rgba(11, 81, 59, .1); background: rgba(255, 255, 255, .94); backdrop-filter: saturate(180%) blur(16px); -webkit-backdrop-filter: saturate(180%) blur(16px); box-shadow: 0 -6px 20px rgba(7, 57, 45, .06); }
+      .tabbar a, .tabbar button { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .1rem; min-height: 52px; padding: .25rem 0; border: 0; border-radius: 12px; color: #6b7d75; background: transparent; font-size: .66rem; font-weight: 600; text-decoration: none; -webkit-tap-highlight-color: transparent; user-select: none; }
+      .tabbar i { font-size: 1.3rem; line-height: 1; transition: transform .2s ease; }
+      .tabbar span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .tabbar .active { color: #0b7a53; }
+      .tabbar .active i { transform: translateY(-1px) scale(1.08); }
+      .tabbar .active::before { position: absolute; top: 0; width: 28px; height: 3px; border-radius: 0 0 3px 3px; content: ''; background: #0b7a53; }
+      .tabbar a:active, .tabbar button:active { background: rgba(11, 122, 83, .08); }
+      .tab-badge { position: absolute; top: 4px; left: calc(50% + 6px); min-width: 18px; padding: 0 .3rem; border-radius: 9px; color: #fff; background: #dc3545; font-size: .62rem; line-height: 18px; text-align: center; }
     }
+
+    @keyframes fondu { from { opacity: 0; } to { opacity: 1; } }
   `]
 })
 export class NavbarComponent implements OnInit, OnDestroy {
-  menuOuvert = false;
   notificationsOuvertes = false;
   notifications: Notification[] = [];
   nonLues = 0;
@@ -163,7 +199,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   private notificationsSubscription?: Subscription;
   private notificationsInitialisees = false;
 
-  constructor(public auth: AuthService, private router: Router, private notificationService: NotificationService,
+  constructor(public auth: AuthService, public miseEnPage: MiseEnPageService, private router: Router, private notificationService: NotificationService,
               private notificationSoundService: NotificationSoundService) {}
 
   ngOnInit(): void {
@@ -224,7 +260,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   fermerMenu(): void {
-    this.menuOuvert = false;
+    this.miseEnPage.fermerMenu();
   }
 
 }

@@ -33,6 +33,10 @@ export const FR = {
   'nav.comptabilite': 'Comptabilité',
   'nav.organismes': 'Assurances & IPM',
   'nav.employes': 'Employés',
+  'nav.accueil': 'Accueil',
+  'nav.rdvCourt': 'RDV',
+  'nav.menu': 'Menu',
+  'nav.fermerMenu': 'Fermer le menu',
 
   'profil.titre': 'Mon profil',
   'profil.infos': 'Informations personnelles',

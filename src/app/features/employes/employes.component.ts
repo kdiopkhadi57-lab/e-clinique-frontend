@@ -94,6 +94,17 @@ type Popup = 'detail' | 'modification' | 'suppression';
   .popup-pied { justify-content: flex-end; flex-wrap: wrap; border-top: 1px solid #e9ecef; }
   .popup-corps { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 1.1rem; }
   dd { margin-bottom: .5rem; }
+  /* Sur smartphone, le popup s'ouvre comme une feuille qui glisse depuis le bas de l'écran. */
+  @media (max-width: 767.98px) {
+    .popup-fond { z-index: 1045; align-items: flex-end; padding: 0; animation: popup-fondu .2s ease; }
+    .popup, .popup-petit { width: 100%; max-height: calc(100dvh - 2.5rem - env(safe-area-inset-top)); border-radius: 18px 18px 0 0; animation: popup-glisse .28s cubic-bezier(.2, .8, .2, 1); }
+    .popup-entete { position: relative; padding-top: 1.35rem; }
+    .popup-entete::before { position: absolute; top: .5rem; left: 50%; width: 40px; height: 4px; border-radius: 2px; content: ''; background: #d5ded9; transform: translateX(-50%); }
+    .popup-pied { padding-bottom: calc(.9rem + env(safe-area-inset-bottom)); }
+    .popup-pied .btn { flex: 1 1 auto; }
+  }
+  @keyframes popup-glisse { from { transform: translateY(100%); } to { transform: none; } }
+  @keyframes popup-fondu { from { opacity: 0; } to { opacity: 1; } }
 `] })
 export class EmployesComponent implements OnInit {
   employes: Utilisateur[] = []; page = 0; totalPages = 0; totalElements = 0; formulaire = false; nouveau: any = { role: 'EMPLOYE', actif: true };

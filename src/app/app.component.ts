@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NgIf } from '@angular/common';
 import { NavbarComponent } from './shared/navbar/navbar.component';
 import { TopbarComponent } from './shared/topbar/topbar.component';
 import { AuthService } from './core/services/auth.service';
+import { TableauxMobilesService } from './core/services/tableaux-mobiles.service';
 
 @Component({
   selector: 'app-root',
@@ -19,6 +20,7 @@ import { AuthService } from './core/services/auth.service';
   styles: [`
     .app-content {
       min-height: 100vh;
+      min-height: 100dvh;
       padding: 1.5rem;
       box-sizing: border-box;
     }
@@ -34,13 +36,18 @@ import { AuthService } from './core/services/auth.service';
       }
     }
 
-    @media (max-width: 575.98px) {
+    /* Smartphones et tablettes : marges réduites et place pour la barre d'onglets du bas. */
+    @media (max-width: 991.98px) {
       .app-content {
-        padding: 1rem;
+        padding: 1rem max(1rem, env(safe-area-inset-right)) calc(5.5rem + env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
       }
     }
   `]
 })
-export class AppComponent {
-  constructor(public auth: AuthService) {}
+export class AppComponent implements OnInit {
+  constructor(public auth: AuthService, private tableauxMobiles: TableauxMobilesService) {}
+
+  ngOnInit(): void {
+    this.tableauxMobiles.demarrer();
+  }
 }

@@ -35,6 +35,10 @@ export const EN: Record<CleTraduction, string> = {
   'nav.comptabilite': 'Accounting',
   'nav.organismes': 'Insurers & IPM',
   'nav.employes': 'Staff',
+  'nav.accueil': 'Home',
+  'nav.rdvCourt': 'Appts',
+  'nav.menu': 'Menu',
+  'nav.fermerMenu': 'Close menu',
 
   'profil.titre': 'My profile',
   'profil.infos': 'Personal information',
