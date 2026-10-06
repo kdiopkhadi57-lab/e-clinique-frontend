@@ -138,7 +138,7 @@ export const routes: Routes = [
   },
   {
     path: 'organismes',
-    canActivate: [roleGuard(['ADMIN'])],
+    canActivate: [roleGuard(['ADMIN', 'RECEPTIONNISTE'])],
     loadComponent: () => import('./features/organismes/organismes.component').then(m => m.OrganismesComponent)
   },
   {

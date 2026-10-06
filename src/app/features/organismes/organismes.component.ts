@@ -15,6 +15,9 @@ import { CreanceOrganisme, Organisme } from '../../core/models/organisme.model';
       <a routerLink="/factures-organismes" class="btn btn-primary"><i class="bi bi-receipt"></i> Factures organismes</a>
     </div>
 
+    <div class="alert alert-success py-2" *ngIf="message">{{ message }}</div>
+    <div class="alert alert-danger py-2" *ngIf="erreurSuppression">{{ erreurSuppression }}</div>
+
     <div class="row g-3">
       <div class="col-lg-8">
         <div class="card p-3">
@@ -33,7 +36,10 @@ import { CreanceOrganisme, Organisme } from '../../core/models/organisme.model';
                   <td class="text-end">{{ (creance(o)?.nonFacture || 0) | number:'1.0-0' }}</td>
                   <td class="text-end">{{ (creance(o)?.factureEnAttente || 0) | number:'1.0-0' }}</td>
                   <td class="text-end">{{ (creance(o)?.paye || 0) | number:'1.0-0' }}</td>
-                  <td class="text-end"><button class="btn btn-sm btn-outline-secondary" (click)="modifier(o)"><i class="bi bi-pencil"></i></button></td>
+                  <td class="text-end text-nowrap">
+                    <button class="btn btn-sm btn-outline-secondary me-1" title="Modifier" (click)="modifier(o)"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" title="Supprimer" (click)="supprimer(o)"><i class="bi bi-trash"></i></button>
+                  </td>
                 </tr>
               </tbody>
               <tfoot *ngIf="creances.length">
@@ -88,6 +94,8 @@ export class OrganismesComponent implements OnInit {
   creances: CreanceOrganisme[] = [];
   edition: Organisme = this.vide();
   erreur = '';
+  message = '';
+  erreurSuppression = '';
 
   constructor(private service: OrganismeService) {}
 
@@ -109,6 +117,20 @@ export class OrganismesComponent implements OnInit {
   modifier(o: Organisme): void { this.edition = { ...o }; this.erreur = ''; }
 
   reinitialiser(): void { this.edition = this.vide(); this.erreur = ''; }
+
+  supprimer(o: Organisme): void {
+    if (!o.id || !confirm(`Supprimer définitivement ${o.nom} ?`)) return;
+    this.message = '';
+    this.erreurSuppression = '';
+    this.service.delete(o.id).subscribe({
+      next: () => {
+        if (this.edition.id === o.id) this.reinitialiser();
+        this.message = `${o.nom} a été supprimé.`;
+        this.charger();
+      },
+      error: (err) => (this.erreurSuppression = err.error?.message || 'La suppression a échoué.')
+    });
+  }
 
   enregistrer(): void {
     const operation = this.edition.id

@@ -84,7 +84,7 @@ import { MiseEnPageService } from '../../core/services/mise-en-page.service';
           <a *ngIf="auth.hasRole('ADMIN')" routerLink="/comptabilite" routerLinkActive="active" (click)="fermerMenu()">
             <i class="bi bi-calculator"></i><span>{{ 'nav.comptabilite' | t }}</span>
           </a>
-          <a *ngIf="auth.hasRole('ADMIN')" routerLink="/organismes" routerLinkActive="active" (click)="fermerMenu()">
+          <a *ngIf="auth.hasRole('ADMIN','RECEPTIONNISTE')" routerLink="/organismes" routerLinkActive="active" (click)="fermerMenu()">
             <i class="bi bi-building"></i><span>{{ 'nav.organismes' | t }}</span>
           </a>
           <a *ngIf="auth.hasRole('ADMIN')" routerLink="/employes" routerLinkActive="active" (click)="fermerMenu()">

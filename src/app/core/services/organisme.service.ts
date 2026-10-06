@@ -12,4 +12,5 @@ export class OrganismeService {
   creances(): Observable<CreanceOrganisme[]> { return this.http.get<CreanceOrganisme[]>(`${this.apiUrl}/creances`); }
   create(organisme: Organisme): Observable<Organisme> { return this.http.post<Organisme>(this.apiUrl, organisme); }
   update(id: number, organisme: Organisme): Observable<Organisme> { return this.http.put<Organisme>(`${this.apiUrl}/${id}`, organisme); }
+  delete(id: number): Observable<void> { return this.http.delete<void>(`${this.apiUrl}/${id}`); }
 }
